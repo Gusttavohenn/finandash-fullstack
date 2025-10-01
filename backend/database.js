@@ -3,7 +3,7 @@
 const sqlite3 = require('sqlite3').verbose();
 
 // Nome do arquivo do banco de dados
-const DBSOURCE = "finandash.db";
+const DBSOURCE = "./data/finandash.db"
 
 // Conecta ao banco de dados (ou cria se não existir)
 const db = new sqlite3.Database(DBSOURCE, (err) => {
