@@ -1,0 +1,65 @@
+{
+  "transactions": [
+    {
+      "id": 1,
+      "description": "Salário Mensal",
+      "amount": 5000.00,
+      "date": "2025-09-01",
+      "type": "income",
+      "category": "Salário"
+    },
+    {
+      "id": 2,
+      "description": "Aluguel",
+      "amount": -1500.00,
+      "date": "2025-09-05",
+      "type": "expense",
+      "category": "Moradia",
+      "paymentMethod": "Boleto"
+    },
+    {
+      "id": 3,
+      "description": "Supermercado",
+      "amount": -450.50,
+      "date": "2025-09-10",
+      "type": "expense",
+      "category": "Alimentação",
+      "paymentMethod": "Cartão de Crédito"
+    },
+    {
+      "id": 4,
+      "description": "Internet/TV",
+      "amount": -120.00,
+      "date": "2025-09-12",
+      "type": "expense",
+      "category": "Contas",
+      "paymentMethod": "Cartão de Débito"
+    },
+    {
+      "id": 5,
+      "description": "Venda de item usado",
+      "amount": 250.00,
+      "date": "2025-09-15",
+      "type": "income",
+      "category": "Outros"
+    },
+    {
+      "id": 6,
+      "description": "Jantar fora",
+      "amount": -85.75,
+      "date": "2025-09-18",
+      "type": "expense",
+      "category": "Lazer",
+      "paymentMethod": "Pix"
+    },
+    {
+      "id": 7,
+      "description": "Gasolina",
+      "amount": -150.00,
+      "date": "2025-09-22",
+      "type": "expense",
+      "category": "Transporte",
+      "paymentMethod": "Cartão de Crédito"
+    }
+  ]
+}
