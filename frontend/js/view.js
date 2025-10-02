@@ -131,8 +131,29 @@ class View {
 
     showPage(pageId) { this.pages.forEach(p => p.classList.add('page-hidden')); document.getElementById(`${pageId}-page`).classList.remove('page-hidden'); this.updateMenuActiveState(pageId); }
     updateMenuActiveState(pageId) { this.menuItems.forEach(i => { i.classList.remove('active'); if (i.dataset.page === pageId) i.classList.add('active'); }); }
-    toggleModal(show = true, transaction = null) { if (show) { this.transactionForm.reset(); if (transaction) { this.modalTitle.textContent = 'Editar Transação'; this.transactionForm['transaction-id'].value = transaction.id; this.transactionForm.description.value = transaction.description; this.transactionForm.amount.value = Math.abs(transaction.amount); this.transactionForm.date.value = transaction.date; this.transactionForm.category.value = transaction.category; this.transactionForm.type.value = transaction.type; this.paymentMethodGroup.style.display = transaction.type === 'expense' ? 'block' : 'none'; if (transaction.type === 'expense') this.paymentMethodSelect.value = transaction.paymentMethod; } else { this.modalTitle.textContent = 'Nova Transação'; this.transactionForm['transaction-id'].value = ''; this.paymentMethodGroup.style.display = this.transactionTypeSelect.value === 'expense' ? 'block' : 'none'; } this.modal.classList.remove('page-hidden'); } else { this.modal.classList.add('page-hidden'); } }
-    displayUserSettings(settings) { if (settings.name) { this.userNameInputEl.value = settings.name; this.userNameHeaderEl.textContent = settings.name; } }
+toggleModal(show = true, transaction = null) { 
+    if (show) { 
+        this.transactionForm.reset(); 
+        if (transaction) { 
+            this.modalTitle.textContent = 'Editar Transação'; 
+            this.transactionForm['transaction-id'].value = transaction.id; 
+            this.transactionForm.description.value = transaction.description; 
+            this.transactionForm.amount.value = Math.abs(transaction.amount); 
+            this.transactionForm.date.value = transaction.date; 
+            this.transactionForm.category.value = transaction.category; 
+            this.transactionForm.type.value = transaction.type; 
+            this.paymentMethodGroup.style.display = transaction.type === 'expense' ? 'block' : 'none'; 
+            if (transaction.type === 'expense') this.paymentMethodSelect.value = transaction.paymentmethod || ''; 
+        } else { 
+            this.modalTitle.textContent = 'Nova Transação'; 
+            this.transactionForm['transaction-id'].value = ''; 
+            this.paymentMethodGroup.style.display = this.transactionTypeSelect.value === 'expense' ? 'block' : 'none'; 
+        } 
+        this.modal.classList.remove('page-hidden'); 
+    } else { 
+        this.modal.classList.add('page-hidden'); 
+    } 
+}    displayUserSettings(settings) { if (settings.name) { this.userNameInputEl.value = settings.name; this.userNameHeaderEl.textContent = settings.name; } }
     hideConfirmationModal() { this.confirmationModal.classList.add('page-hidden'); }
     showConfirmationModal(message, onConfirm) { this.confirmationMessage.textContent = message; this.confirmationModal.classList.remove('page-hidden'); this.confirmActionBtn.onclick = () => { onConfirm(); this.hideConfirmationModal(); }; }
     showToast(message, type = 'success') { const t = document.createElement('div'); t.className = `toast ${type}`; t.textContent = message; this.toastContainer.appendChild(t); setTimeout(() => { t.remove(); }, 4000); }
