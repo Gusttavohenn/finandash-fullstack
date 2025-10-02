@@ -1,3 +1,4 @@
+// --- CONTROLLER ---
 console.log("Controller.js carregado.");
 
 class Controller {
@@ -89,20 +90,20 @@ class Controller {
         if (this.currentPage < totalPages) { this.currentPage++; this.onDataChanged(); }
     }
     handleMenuNavigation = (pageId) => { this.view.showPage(pageId); }
-    handleSubmitTransaction = async (data) => { if (data.id) await this.model.editTransaction(data.id, data); else await this.model.addTransaction(data); this.onDataChanged(); }
+    handleSubmitTransaction = async (data) => { if (data.id) { await this.model.editTransaction(data.id, data); this.view.showToast('Transação atualizada!'); } else { await this.model.addTransaction(data); this.view.showToast('Transação adicionada!'); } this.onDataChanged(); }
     handleEditTransaction = (id) => { const t = this.model.getTransactionById(id); if (t) this.view.toggleModal(true, t); }
-    handleDeleteTransaction = async (id) => { await this.model.deleteTransaction(id); this.view.showToast('Transação excluída.', 'success'); this.onDataChanged(); }
+    handleDeleteTransaction = async (id) => { await this.model.deleteTransaction(id); this.view.showToast('Transação excluída.'); this.onDataChanged(); }
     handleThemeToggle = () => { document.body.classList.toggle('dark-mode'); localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light'); }
-    handleSaveSettings = (newName) => { /* A lógica de salvar nome do usuário ainda é local */ this.onDataChanged(); this.view.showToast('Perfil salvo com sucesso!'); }
-    handleClearAllData = async () => { await this.model.clearAllData(); this.view.showToast('Todos os dados de transações foram apagados.', 'success'); this.onDataChanged(); }
+    handleSaveSettings = (newName) => {  this.view.showToast('Perfil salvo!'); }
+    handleClearAllData = async () => { await this.model.clearAllData(); this.view.showToast('Todas as transações foram apagadas.'); this.onDataChanged(); }
     handleLogout = () => { sessionStorage.clear(); window.location.href = '/login'; }
-    handleUpdateBudget = async (category, amount) => { await this.model.updateBudget(category, amount); this.view.showToast('Orçamento salvo com sucesso!'); this.onDataChanged(); }
-    handleDeleteBudget = async (category) => { await this.model.deleteBudget(category); this.view.showToast('Orçamento removido.', 'success'); this.onDataChanged(); }
-    handleAddRecurring = async (data) => { await this.model.addRecurringTransaction(data); this.view.showToast('Transação recorrente salva!'); this.onDataChanged(); }
-    handleDeleteRecurring = async (id) => { await this.model.deleteRecurringTransaction(id); this.view.showToast('Transação recorrente removida.', 'success'); this.onDataChanged(); }
+    handleUpdateBudget = async (category, amount) => { await this.model.updateBudget(category, amount); this.view.showToast('Orçamento salvo!'); this.onDataChanged(); }
+    handleDeleteBudget = async (category) => { await this.model.deleteBudget(category); this.view.showToast('Orçamento removido.'); this.onDataChanged(); }
+    handleAddRecurring = async (data) => { await this.model.addRecurringTransaction(data); this.view.showToast('Recorrência salva!'); this.onDataChanged(); }
+    handleDeleteRecurring = async (id) => { await this.model.deleteRecurringTransaction(id); this.view.showToast('Recorrência removida.'); this.onDataChanged(); }
     handleAddReminder = async (data) => { await this.model.addReminder(data); this.view.showToast('Lembrete adicionado!'); this.onDataChanged(); }
     handleUpdateReminder = async (id, isPaid) => { await this.model.updateReminder(id, isPaid); this.onDataChanged(); }
-    handleDeleteReminder = async (id) => { await this.model.deleteReminder(id); this.view.showToast('Lembrete removido.', 'success'); this.onDataChanged(); }
+    handleDeleteReminder = async (id) => { await this.model.deleteReminder(id); this.view.showToast('Lembrete removido.'); this.onDataChanged(); }
 }
 
 // --- PONTO DE ENTRADA DA APLICAÇÃO ---

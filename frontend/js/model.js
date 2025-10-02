@@ -1,16 +1,17 @@
+// --- MODEL ---
 console.log("Model.js carregado.");
 
 class Model {
     constructor() {
-        // URL final
         this.API_URL = 'https://finandash-api-gustavo.onrender.com/api';
         this.transactions = [];
         this.userSettings = { name: 'Usuário' };
         this.budgets = {};
         this.recurringTransactions = [];
+        this.reminders = []; // Propriedade para lembretes
     }
 
-    // autenticacao
+    // --- HELPER DE AUTENTICAÇÃO ---
     _getAuthHeaders() {
         const token = sessionStorage.getItem('authToken');
         return {
@@ -19,148 +20,64 @@ class Model {
         };
     }
 
+    // --- CARREGAMENTO INICIAL DE DADOS ---
     async loadInitialData() {
-    try {
-        await fetch(`${this.API_URL}/recurring/generate`, { method: 'POST', headers: this._getAuthHeaders() });
+        try {
+            await fetch(`${this.API_URL}/recurring/generate`, { method: 'POST', headers: this._getAuthHeaders() });
 
-        const responses = await Promise.all([
-            fetch(`${this.API_URL}/transactions`, { headers: this._getAuthHeaders() }),
-            fetch(`${this.API_URL}/budgets`, { headers: this._getAuthHeaders() }),
-            fetch(`${this.API_URL}/recurring`, { headers: this._getAuthHeaders() })
-        ]);
+            const [transactions, budgets, recurring, reminders] = await Promise.all([
+                fetch(`${this.API_URL}/transactions`, { headers: this._getAuthHeaders() }).then(res => res.json()),
+                fetch(`${this.API_URL}/budgets`, { headers: this._getAuthHeaders() }).then(res => res.json()),
+                fetch(`${this.API_URL}/recurring`, { headers: this._getAuthHeaders() }).then(res => res.json()),
+                fetch(`${this.API_URL}/reminders`, { headers: this._getAuthHeaders() }).then(res => res.json())
+            ]);
+            
+            this.transactions = transactions;
+            this.budgets = budgets;
+            this.recurringTransactions = recurring;
+            this.reminders = reminders;
 
-        for (const res of responses) {
-            if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(`Falha na API: ${errorData.message || res.statusText}`);
-            }
+            const loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
+            this.userSettings.name = loggedInUser.name;
+
+        } catch (error) {
+            console.error("Erro ao carregar dados iniciais:", error);
+            alert("Houve um erro ao carregar seus dados. O servidor pode estar indisponível. Tente atualizar a página.");
         }
-        
-        const [transactions, budgets, recurring] = await Promise.all(responses.map(res => res.json()));
-        
-        this.transactions = transactions;
-        this.budgets = budgets;
-        this.recurringTransactions = recurring;
-
-        const loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
-        this.userSettings.name = loggedInUser.name;
-
-    } catch (error) {
-        console.error("ERRO CRÍTICO ao carregar dados iniciais:", error);
-        alert("Houve um erro ao carregar seus dados. O servidor pode estar indisponível. Verifique o console (F12) e tente atualizar a página em alguns segundos.");
-    }
-}
-
-    // manip API
-    async addTransaction(data) {
-        const response = await fetch(`${this.API_URL}/transactions`, { method: 'POST', headers: this._getAuthHeaders(), body: JSON.stringify(data) });
-        const newTransaction = await response.json();
-        this.transactions.unshift(newTransaction);
     }
 
-    async editTransaction(id, data) {
-        const response = await fetch(`${this.API_URL}/transactions/${id}`, { method: 'PUT', headers: this._getAuthHeaders(), body: JSON.stringify(data) });
-        const updatedTransaction = await response.json();
-        const index = this.transactions.findIndex(t => t.id === id);
-        if (index !== -1) this.transactions[index] = updatedTransaction;
-    }
+    // --- MANIPULAÇÃO VIA API ---
+    async addTransaction(data) { const res = await fetch(`${this.API_URL}/transactions`, { method: 'POST', headers: this._getAuthHeaders(), body: JSON.stringify(data) }); this.transactions.unshift(await res.json()); }
+    async editTransaction(id, data) { const res = await fetch(`${this.API_URL}/transactions/${id}`, { method: 'PUT', headers: this._getAuthHeaders(), body: JSON.stringify(data) }); const updated = await res.json(); const index = this.transactions.findIndex(t => t.id === id); if (index !== -1) this.transactions[index] = updated; }
+    async deleteTransaction(id) { await fetch(`${this.API_URL}/transactions/${id}`, { method: 'DELETE', headers: this._getAuthHeaders() }); this.transactions = this.transactions.filter(t => t.id !== id); }
+    async clearAllData() { await fetch(`${this.API_URL}/transactions`, { method: 'DELETE', headers: this._getAuthHeaders() }); this.transactions = []; }
+    async updateBudget(category, amount) { await fetch(`${this.API_URL}/budgets`, { method: 'POST', headers: this._getAuthHeaders(), body: JSON.stringify({ category, amount }) }); if (amount > 0) this.budgets[category] = amount; else delete this.budgets[category]; }
+    async deleteBudget(category) { await this.updateBudget(category, 0); }
+    async addRecurringTransaction(data) { const res = await fetch(`${this.API_URL}/recurring`, { method: 'POST', headers: this._getAuthHeaders(), body: JSON.stringify(data) }); this.recurringTransactions.push(await res.json()); }
+    async deleteRecurringTransaction(id) { await fetch(`${this.API_URL}/recurring/${id}`, { method: 'DELETE', headers: this._getAuthHeaders() }); this.recurringTransactions = this.recurringTransactions.filter(rt => rt.id !== id); }
+    async addReminder(data) { const res = await fetch(`${this.API_URL}/reminders`, { method: 'POST', headers: this._getAuthHeaders(), body: JSON.stringify(data) }); this.reminders.push(await res.json()); }
+    async updateReminder(id, isPaid) { const res = await fetch(`${this.API_URL}/reminders/${id}`, { method: 'PUT', headers: this._getAuthHeaders(), body: JSON.stringify({ isPaid }) }); const updated = await res.json(); const index = this.reminders.findIndex(r => r.id === id); if (index !== -1) this.reminders[index] = updated; }
+    async deleteReminder(id) { await fetch(`${this.API_URL}/reminders/${id}`, { method: 'DELETE', headers: this._getAuthHeaders() }); this.reminders = this.reminders.filter(r => r.id !== id); }
 
-    async deleteTransaction(id) {
-        await fetch(`${this.API_URL}/transactions/${id}`, { method: 'DELETE', headers: this._getAuthHeaders() });
-        this.transactions = this.transactions.filter(t => t.id !== id);
-    }
-
-    async clearAllData() {
-        await fetch(`${this.API_URL}/transactions`, { method: 'DELETE', headers: this._getAuthHeaders() });
-        this.transactions = [];
-    }
-    
-    async updateBudget(category, amount) {
-        await fetch(`${this.API_URL}/budgets`, { method: 'POST', headers: this._getAuthHeaders(), body: JSON.stringify({ category, amount }) });
-        if (amount > 0) this.budgets[category] = amount;
-        else delete this.budgets[category];
-    }
-    
-    async deleteBudget(category) {
-        await this.updateBudget(category, 0);
-    }
-    
-    async addRecurringTransaction(data) {
-        const response = await fetch(`${this.API_URL}/recurring`, { method: 'POST', headers: this._getAuthHeaders(), body: JSON.stringify(data) });
-        const newRecurring = await response.json();
-        this.recurringTransactions.push(newRecurring);
-    }
-    
-    async deleteRecurringTransaction(id) {
-        await fetch(`${this.API_URL}/recurring/${id}`, { method: 'DELETE', headers: this._getAuthHeaders() });
-        this.recurringTransactions = this.recurringTransactions.filter(rt => rt.id !== id);
-    }
-
-    // GET e calculos
+    // --- MÉTODOS DE GET E CÁLCULO (LOCAIS) ---
     getTransactions() { return this.transactions.sort((a, b) => new Date(b.date) - new Date(a.date)); }
     getBudgets() { return this.budgets; }
     getRecurringTransactions() { return this.recurringTransactions; }
+    getReminders() { return this.reminders.sort((a, b) => new Date(a.duedate) - new Date(b.duedate)); }
+    getDashboardReminders() { return this.getReminders().filter(r => !r.ispaid).slice(0, 3); }
     getTransactionById(id) { return this.transactions.find(t => t.id === id); }
-    getFilteredTransactions(filters) {
-        let filtered = this.getTransactions();
-        if (filters.searchTerm) filtered = filtered.filter(t => t.description.toLowerCase().includes(filters.searchTerm.toLowerCase()));
-        if (filters.type && filters.type !== 'all') filtered = filtered.filter(t => t.type === filters.type);
-        if (filters.month && filters.month !== 'all') filtered = filtered.filter(t => t.date.startsWith(filters.month));
-        return filtered;
-    }
+    getFilteredTransactions(filters) { let f = this.getTransactions(); if (filters.searchTerm) f = f.filter(t => t.description.toLowerCase().includes(filters.searchTerm.toLowerCase())); if (filters.type && filters.type !== 'all') f = f.filter(t => t.type === filters.type); if (filters.month && filters.month !== 'all') f = f.filter(t => t.date.startsWith(filters.month)); return f; }
     getTransactionsByDateRange(range) {
         const now = new Date();
         switch (range) {
-            case 'thisMonth':
-                const thisMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-                return this.transactions.filter(t => t.date.startsWith(thisMonthStr));
-            case 'lastMonth':
-                const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-                const lastMonthStr = `${lastMonthDate.getFullYear()}-${String(lastMonthDate.getMonth() + 1).padStart(2, '0')}`;
-                return this.transactions.filter(t => t.date.startsWith(lastMonthStr));
-            case 'thisYear':
-                return this.transactions.filter(t => t.date.startsWith(String(now.getFullYear())));
+            case 'thisMonth': const m = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`; return this.transactions.filter(t => t.date.startsWith(m));
+            case 'lastMonth': const d = new Date(now.getFullYear(), now.getMonth() - 1, 1); const lm = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; return this.transactions.filter(t => t.date.startsWith(lm));
+            case 'thisYear': return this.transactions.filter(t => t.date.startsWith(String(now.getFullYear())));
             default: return this.transactions;
         }
     }
-    calculateTotals(transactions) {
-        const totals = transactions.reduce((acc, t) => {
-            if (t.type === 'income') acc.revenue += parseFloat(t.amount); else if (t.type === 'expense') acc.expenses += parseFloat(t.amount);
-            return acc;
-        }, { revenue: 0, expenses: 0 });
-        totals.balance = totals.revenue + totals.expenses;
-        return totals;
-    }
-    getExpensesByCategory(transactions) {
-        return transactions.filter(t => t.type === 'expense').reduce((acc, t) => {
-            const { category, amount } = t;
-            if (!acc[category]) acc[category] = 0;
-            acc[category] += Math.abs(parseFloat(amount));
-            return acc;
-        }, {});
-    }
-    getMonthlySummary(numberOfMonths) {
-        const summary = { labels: [], incomeData: [], expenseData: [] };
-        const now = new Date(); now.setDate(15);
-        for (let i = 0; i < numberOfMonths; i++) {
-            const date = new Date(now.getFullYear(), now.getMonth() - i, 15);
-            const label = `${date.toLocaleString('pt-BR', { month: 'short' }).replace('.', '')}/${date.getFullYear()}`;
-            summary.labels.push(label.charAt(0).toUpperCase() + label.slice(1));
-            const monthStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-            const monthTransactions = this.transactions.filter(t => t.date.startsWith(monthStr));
-            let totalIncome = 0; let totalExpense = 0;
-            monthTransactions.forEach(t => { if (t.type === 'income') totalIncome += parseFloat(t.amount); else totalExpense += Math.abs(parseFloat(t.amount)); });
-            summary.incomeData.push(totalIncome);
-            summary.expenseData.push(totalExpense);
-        }
-        summary.labels.reverse(); summary.incomeData.reverse(); summary.expenseData.reverse();
-        return summary;
-    }
-    getBudgetsStatus() {
-        const spentByCategory = this.getExpensesByCategory(this.getTransactionsByDateRange('thisMonth'));
-        return Object.entries(this.budgets).map(([category, budgetAmount]) => {
-            const spent = spentByCategory[category] || 0;
-            return { category, budget: parseFloat(budgetAmount), spent, percentage: parseFloat(budgetAmount) > 0 ? (spent / parseFloat(budgetAmount)) * 100 : 0 };
-        }).sort((a, b) => b.percentage - a.percentage);
-    }
+    calculateTotals(transactions) { const t = transactions.reduce((a, t) => { if (t.type === 'income') a.revenue += parseFloat(t.amount); else if (t.type === 'expense') a.expenses += parseFloat(t.amount); return a; }, { revenue: 0, expenses: 0 }); t.balance = t.revenue + t.expenses; return t; }
+    getExpensesByCategory(transactions) { return transactions.filter(t => t.type === 'expense').reduce((a, t) => { const { category: c, amount: m } = t; if (!a[c]) a[c] = 0; a[c] += Math.abs(parseFloat(m)); return a; }, {}); }
+    getMonthlySummary(numMonths) { const s = { labels: [], incomeData: [], expenseData: [] }; const n = new Date(); n.setDate(15); for (let i = 0; i < numMonths; i++) { const d = new Date(n.getFullYear(), n.getMonth() - i, 15); const l = `${d.toLocaleString('pt-BR', { month: 'short' }).replace('.', '')}/${d.getFullYear()}`; s.labels.push(l.charAt(0).toUpperCase() + l.slice(1)); const m = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; const mT = this.transactions.filter(t => t.date.startsWith(m)); let tI = 0; let tE = 0; mT.forEach(t => { if (t.type === 'income') tI += parseFloat(t.amount); else tE += Math.abs(parseFloat(t.amount)); }); s.incomeData.push(tI); s.expenseData.push(tE); } s.labels.reverse(); s.incomeData.reverse(); s.expenseData.reverse(); return s; }
+    getBudgetsStatus() { const s = this.getExpensesByCategory(this.getTransactionsByDateRange('thisMonth')); return Object.entries(this.budgets).map(([c, b]) => ({ category: c, budget: parseFloat(b), spent: s[c] || 0, percentage: parseFloat(b) > 0 ? ((s[c] || 0) / parseFloat(b)) * 100 : 0 })).sort((a, b) => b.percentage - a.percentage); }
 }
