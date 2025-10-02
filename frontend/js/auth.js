@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
             sessionStorage.setItem('loggedInUser', JSON.stringify(data.user));
             sessionStorage.setItem('authToken', data.token);
             // Redireciona para o dashboard principal
-            wwindow.location.href = '/index.html';
+            window.location.href = '/index.html';
         } catch (error) {
             loginError.textContent = error.message;
         }
