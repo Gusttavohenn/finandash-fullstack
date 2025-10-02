@@ -12,16 +12,13 @@
     <div class="dashboard-container">
         <nav class="sidebar">
             <header class="sidebar-header">
-                <a href="#" class="logo">
-                    <i class="fas fa-wallet"></i>
-                    <span>FinanDash</span>
-                </a>
+                <a href="#" class="logo"><i class="fas fa-wallet"></i><span>FinanDash</span></a>
             </header>
             <div class="sidebar-menu">
                 <a href="#" class="menu-item active" data-page="dashboard"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
                 <a href="#" class="menu-item" data-page="transactions"><i class="fas fa-exchange-alt"></i><span>Transações</span></a>
-                <a href="#" class="menu-item" data-page="budgets"><i class="fas fa-bullseye"></i><span>Orçamentos</span></a>
                 <a href="#" class="menu-item" data-page="reminders"><i class="fas fa-bell"></i><span>Lembretes</span></a>
+                <a href="#" class="menu-item" data-page="budgets"><i class="fas fa-bullseye"></i><span>Orçamentos</span></a>
                 <a href="#" class="menu-item" data-page="recurring"><i class="fas fa-sync-alt"></i><span>Recorrentes</span></a>
                 <a href="#" class="menu-item" data-page="settings"><i class="fas fa-cog"></i><span>Configurações</span></a>
                 <a href="#" class="menu-item logout"><i class="fas fa-sign-out-alt"></i><span>Sair</span></a>
@@ -82,57 +79,23 @@
             <section id="transactions-page" class="page-content page-hidden">
                 <header class="main-header">
                     <h2>Gerenciar Transações</h2>
-                    <div class="header-actions">
-                        <button id="add-transaction-btn" class="btn-primary">Adicionar Nova</button>
-                    </div>
+                    <div class="header-actions"><button id="add-transaction-btn" class="btn-primary">Adicionar Nova</button></div>
                 </header>
                 <div class="filter-bar">
-                    <input type="text" id="search-input" class="filter-input" placeholder="🔎 Buscar por descrição...">
-                    <select id="type-filter" class="filter-select">
-                        <option value="all">Todos os Tipos</option>
-                        <option value="income">Receita</option>
-                        <option value="expense">Despesa</option>
-                    </select>
-                    <select id="month-filter" class="filter-select"></select>
+                    <input type="text" id="search-input" class="filter-input" placeholder="🔎 Buscar por descrição..."><select id="type-filter" class="filter-select"><option value="all">Todos os Tipos</option><option value="income">Receita</option><option value="expense">Despesa</option></select><select id="month-filter" class="filter-select"></select>
                 </div>
                 <div class="full-transactions-list">
                      <h3>Todas as Transações</h3>
                      <table id="full-transactions-table">
-                         <thead>
-                             <tr><th>Descrição</th><th>Data</th><th>Valor</th><th>Categoria</th><th>Método</th><th>Ações</th></tr>
-                         </thead>
+                         <thead><tr><th>Descrição</th><th>Data</th><th>Valor</th><th>Categoria</th><th>Método</th><th>Ações</th></tr></thead>
                          <tbody></tbody>
                      </table>
                 </div>
-                <div id="pagination-controls">
-                    <button id="prev-page-btn" class="btn-secondary">&laquo; Anterior</button>
-                    <span id="page-info"></span>
-                    <button id="next-page-btn" class="btn-secondary">Próxima &raquo;</button>
-                </div>
-            </section>
-
-            <section id="budgets-page" class="page-content page-hidden">
-                <header class="main-header">
-                   <h2>Meus Orçamentos Mensais</h2>
-                </header>
-                <div class="settings-card">
-                    <h3>Definir Limites por Categoria</h3>
-                    <form id="budget-form">
-                        <div class="form-group"><label for="budget-category">Categoria</label><input type="text" id="budget-category" placeholder="Ex: Alimentação" required></div>
-                        <div class="form-group"><label for="budget-amount">Valor do Orçamento (R$)</label><input type="number" id="budget-amount" placeholder="Ex: 500" required step="0.01" min="0"></div>
-                        <button type="submit" class="btn-primary">Salvar Orçamento</button>
-                    </form>
-                </div>
-                <div class="full-transactions-list">
-                    <h3>Orçamentos Salvos</h3>
-                    <div id="budgets-list"></div>
-                </div>
+                <div id="pagination-controls"><button id="prev-page-btn" class="btn-secondary">&laquo; Anterior</button><span id="page-info"></span><button id="next-page-btn" class="btn-secondary">Próxima &raquo;</button></div>
             </section>
 
             <section id="reminders-page" class="page-content page-hidden">
-                <header class="main-header">
-                   <h2>Lembretes de Pagamento</h2>
-                </header>
+                <header class="main-header"><h2>Lembretes de Pagamento</h2></header>
                 <div class="settings-card">
                     <h3>Adicionar Novo Lembrete</h3>
                     <form id="reminder-form">
@@ -142,16 +105,24 @@
                         <button type="submit" class="btn-primary">Salvar Lembrete</button>
                     </form>
                 </div>
-                <div class="full-transactions-list">
-                    <h3>Meus Lembretes</h3>
-                    <div id="reminders-list"></div>
-                </div>
+                <div class="full-transactions-list"><h3>Meus Lembretes</h3><div id="reminders-list"></div></div>
             </section>
 
+            <section id="budgets-page" class="page-content page-hidden">
+                <header class="main-header"><h2>Meus Orçamentos Mensais</h2></header>
+                <div class="settings-card">
+                    <h3>Definir Limites por Categoria</h3>
+                    <form id="budget-form">
+                        <div class="form-group"><label for="budget-category">Categoria</label><input type="text" id="budget-category" placeholder="Ex: Alimentação" required></div>
+                        <div class="form-group"><label for="budget-amount">Valor do Orçamento (R$)</label><input type="number" id="budget-amount" placeholder="Ex: 500" required step="0.01" min="0"></div>
+                        <button type="submit" class="btn-primary">Salvar Orçamento</button>
+                    </form>
+                </div>
+                <div class="full-transactions-list"><h3>Orçamentos Salvos</h3><div id="budgets-list"></div></div>
+            </section>
+            
             <section id="recurring-page" class="page-content page-hidden">
-                <header class="main-header">
-                   <h2>Transações Recorrentes</h2>
-                </header>
+                <header class="main-header"><h2>Transações Recorrentes</h2></header>
                 <div class="settings-card">
                     <h3>Cadastrar Nova Transação Recorrente</h3>
                     <p>Transações cadastradas aqui serão criadas automaticamente todo mês.</p>
@@ -160,17 +131,11 @@
                         <div class="form-group"><label for="recurring-amount">Valor (R$)</label><input type="number" id="recurring-amount" placeholder="Ex: 1200" required step="0.01" min="0"></div>
                         <div class="form-group"><label for="recurring-day">Dia do Mês para Lançamento</label><input type="number" id="recurring-day" placeholder="Ex: 5" required min="1" max="31"></div>
                         <div class="form-group"><label for="recurring-category">Categoria</label><input type="text" id="recurring-category" placeholder="Ex: Salário, Moradia" required></div>
-                        <div class="form-group">
-                            <label for="recurring-type">Tipo</label>
-                            <select id="recurring-type" required><option value="income">Receita</option><option value="expense">Despesa</option></select>
-                        </div>
+                        <div class="form-group"><label for="recurring-type">Tipo</label><select id="recurring-type" required><option value="income">Receita</option><option value="expense">Despesa</option></select></div>
                         <button type="submit" class="btn-primary">Salvar Transação Recorrente</button>
                     </form>
                 </div>
-                <div class="full-transactions-list">
-                    <h3>Recorrências Salvas</h3>
-                    <div id="recurring-list"></div>
-                </div>
+                <div class="full-transactions-list"><h3>Recorrências Salvas</h3><div id="recurring-list"></div></div>
             </section>
             
             <section id="settings-page" class="page-content page-hidden">
@@ -182,51 +147,17 @@
                         <button type="submit" class="btn-primary">Salvar Perfil</button>
                     </form>
                 </div>
-                <div class="settings-card">
-                    <h3>Sessão</h3>
-                    <button id="logout-btn-page" class="btn-danger">Sair da Conta</button>
-                </div>
+                <div class="settings-card"><h3>Sessão</h3><button id="logout-btn-page" class="btn-danger">Sair da Conta</button></div>
                 <div class="settings-card danger-zone">
-                    <h3>Zona de Perigo</h3>
-                    <p>Ações nesta área são permanentes e não podem ser desfeitas.</p>
+                    <h3>Zona de Perigo</h3><p>Ações nesta área são permanentes e não podem ser desfeitas.</p>
                     <button id="clear-data-btn" class="btn-danger">Apagar Todos os Dados</button>
                 </div>
             </section>
         </main>
     </div>
 
-    <div id="transaction-modal" class="modal-overlay page-hidden">
-        <div class="modal-content">
-            <form id="transaction-form">
-                <h3 id="modal-title">Nova Transação</h3>
-                <input type="hidden" id="transaction-id">
-                <div class="form-group"><label for="description">Descrição</label><input type="text" id="description" required></div>
-                <div class="form-group"><label for="amount">Valor</label><input type="number" id="amount" step="0.01" placeholder="Ex: 15.50 (sempre positivo)" required min="0"></div>
-                <div class="form-group"><label for="date">Data</label><input type="date" id="date" required></div>
-                <div class="form-group"><label for="category">Categoria</label><input type="text" id="category" required></div>
-                <div class="form-group">
-                    <label for="type">Tipo</label>
-                    <select id="type" required><option value="expense">Despesa</option><option value="income">Receita</option></select>
-                </div>
-                <div class="form-group" id="payment-method-group">
-                    <label for="payment-method">Método de Pagamento</label>
-                    <select id="payment-method">
-                        <option value="Pix">Pix</option><option value="Cartão de Crédito">Cartão de Crédito</option><option value="Cartão de Débito">Cartão de Débito</option>
-                        <option value="Dinheiro">Dinheiro</option><option value="Boleto">Boleto</option><option value="Transferência">Transferência</option>
-                    </select>
-                </div>
-                <div class="form-actions"><button type="button" id="cancel-btn" class="btn-secondary">Cancelar</button><button type="submit" class="btn-primary">Salvar</button></div>
-            </form>
-        </div>
-    </div>
-    <div id="confirmation-modal" class="modal-overlay page-hidden">
-        <div class="modal-content">
-            <h3 id="confirmation-title">Confirmar Ação</h3>
-            <p id="confirmation-message">Você tem certeza que deseja executar esta ação?</p>
-            <div class="form-actions"><button id="cancel-confirmation-btn" class="btn-secondary">Cancelar</button><button id="confirm-action-btn" class="btn-danger">Sim, Excluir</button></div>
-        </div>
-    </div>
-    
+    <div id="transaction-modal" class="modal-overlay page-hidden"><div class="modal-content"><form id="transaction-form"><h3 id="modal-title">Nova Transação</h3><input type="hidden" id="transaction-id"><div class="form-group"><label for="description">Descrição</label><input type="text" id="description" required></div><div class="form-group"><label for="amount">Valor</label><input type="number" id="amount" step="0.01" placeholder="Ex: 15.50 (sempre positivo)" required min="0"></div><div class="form-group"><label for="date">Data</label><input type="date" id="date" required></div><div class="form-group"><label for="category">Categoria</label><input type="text" id="category" required></div><div class="form-group"><label for="type">Tipo</label><select id="type" required><option value="expense">Despesa</option><option value="income">Receita</option></select></div><div class="form-group" id="payment-method-group"><label for="payment-method">Método de Pagamento</label><select id="payment-method"><option value="Pix">Pix</option><option value="Cartão de Crédito">Cartão de Crédito</option><option value="Cartão de Débito">Cartão de Débito</option><option value="Dinheiro">Dinheiro</option><option value="Boleto">Boleto</option><option value="Transferência">Transferência</option></select></div><div class="form-actions"><button type="button" id="cancel-btn" class="btn-secondary">Cancelar</button><button type="submit" class="btn-primary">Salvar</button></div></form></div></div>
+    <div id="confirmation-modal" class="modal-overlay page-hidden"><div class="modal-content"><h3 id="confirmation-title">Confirmar Ação</h3><p id="confirmation-message">Você tem certeza?</p><div class="form-actions"><button id="cancel-confirmation-btn" class="btn-secondary">Cancelar</button><button id="confirm-action-btn" class="btn-danger">Sim, Excluir</button></div></div></div>
     <div id="toast-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
