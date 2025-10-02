@@ -9,7 +9,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'segredo-local-para-dev';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors({ origin: "https://finandash-fullstack.vercel.app" }));
+app.use(cors({ origin: "https://nexo-financeiro.vercel.app" }));
 app.use(express.json());
 
 const createTables = async () => {
