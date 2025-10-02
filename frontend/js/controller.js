@@ -1,4 +1,3 @@
-// --- CONTROLLER ---
 console.log("Controller.js carregado.");
 
 class Controller {
@@ -79,7 +78,7 @@ class Controller {
         this.view.bindReminderForm(this.handleAddReminder);
     }
 
-    // --- HANDLERS ---
+    // handle
     handleFilterChange = () => { this.currentPage = 1; this.onDataChanged(); }
     handleDashboardChange = () => { this.onDataChanged(); }
     handlePrevPage = () => { if (this.currentPage > 1) { this.currentPage--; this.onDataChanged(); } }
@@ -106,7 +105,23 @@ class Controller {
     handleDeleteReminder = async (id) => { await this.model.deleteReminder(id); this.view.showToast('Lembrete removido.'); this.onDataChanged(); }
 }
 
-// --- PONTO DE ENTRADA DA APLICAÇÃO ---
 const applyInitialTheme = () => { if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode'); }
 applyInitialTheme();
 const app = new Controller(new Model(), new View());
+
+function setFavicon() {
+    const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+    link.type = 'image/svg+xml';
+    link.rel = 'shortcut icon';
+
+    const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+            <path fill="#4A69BD" d="M461.2 128.3L371.3 218c-3.9 3.9-10.2 3.9-14.1 0l-42.2-42.2c-3.9-3.9-3.9-10.2 0-14.1l89.9-89.9c3.9-3.9 10.2-3.9 14.1 0l42.2 42.2c3.9 3.9 3.9 10.2 0 14.1zM315.9 272.5L200 388.4l-42.2-42.2c-3.9-3.9-10.2-3.9-14.1 0L53.7 436.3c-3.9 3.9-3.9 10.2 0 14.1l42.2 42.2c3.9 3.9 10.2 3.9 14.1 0L200 404.7l115.9 115.9c3.9 3.9 10.2 3.9 14.1 0l42.2-42.2c3.9-3.9 3.9-10.2 0-14.1L279.8 286.6c-3.9-3.9-10.2-3.9-14.1 0l-42.2 42.2c-3.9 3.9-10.2 3.9-14.1 0L157.3 279c-3.9-3.9-3.9-10.2 0-14.1l42.2-42.2c3.9-3.9 10.2-3.9 14.1 0l115.9 115.9c3.9 3.9 10.2 3.9 14.1 0l42.2-42.2c3.9-3.9 3.9-10.2 0-14.1L315.9 272.5zM48 64C21.5 64 0 85.5 0 112v288c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48H48z"/>
+        </svg>
+    `;
+    
+    link.href = `data:image/svg+xml,${encodeURIComponent(svg)}`;
+    document.getElementsByTagName('head')[0].appendChild(link);
+}
+
+setFavicon();
