@@ -1,9 +1,10 @@
-// Este script verifica se existe um usuário logado na sessão.
-// Se não houver, ele redireciona o usuário para a página de login.
-
 const loggedInUser = sessionStorage.getItem('loggedInUser');
+const isLoginPage = window.location.pathname === '/' || window.location.pathname.startsWith('/login');
 
-if (!loggedInUser) {
-    // Se não encontrou dados do usuário, volta para o login
-    window.location.href = '/login'
+if (!loggedInUser && !isLoginPage) {
+    // Se não está logado E não está na página de login, redireciona para o login
+    window.location.href = '/';
+} else if (loggedInUser && isLoginPage) {
+    // Se está logado E está tentando acessar a página de login, redireciona para o dashboard
+    window.location.href = '/dashboard';
 }

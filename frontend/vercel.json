@@ -1,8 +1,8 @@
 {
-  "cleanUrls": true,
   "rewrites": [
-    { "source": "/dashboard", "destination": "/index.html" },
-    { "source": "/login", "destination": "/login.html" },
-    { "source": "/", "destination": "/login.html" }
+    {
+      "source": "/((?!api/|.*\\.\\w+).*)",
+      "destination": "/index.html"
+    }
   ]
 }
