@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 3000;
 
 // Middlewares
 // Em produção, troque '*' pela URL do seu frontend (ex: https://seu-site.vercel.app)
-app.use(cors({ origin: '*' })); 
+app.use(cors({ origin: 'https://finandash-fullstack.vercel.app' })); 
 app.use(express.json());
 
 // Função para criar tabelas se não existirem
