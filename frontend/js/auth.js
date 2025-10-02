@@ -8,10 +8,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginError = document.getElementById('login-error');
     const signupError = document.getElementById('signup-error');
 
-    // URL final
     const API_URL = 'https://finandash-api-gustavo.onrender.com/api';
 
-    // alternar entre os formulários
+    /**
+     * @param {string} message 
+     * @param {string} type 
+     */
+    function showToast(message, type = 'success') {
+        const toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) return;
+
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+
+        toastContainer.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 4000);
+    }
+
     showSignup.addEventListener('click', (e) => {
         e.preventDefault();
         loginFormContainer.classList.add('hidden');
@@ -24,13 +41,14 @@ document.addEventListener('DOMContentLoaded', () => {
         loginFormContainer.classList.remove('hidden');
     });
 
-    // Lógica de Cadastro conectada à API
     signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         signupError.textContent = '';
+
         const name = document.getElementById('signup-name').value;
         const email = document.getElementById('signup-email').value;
         const password = document.getElementById('signup-password').value;
+
         try {
             const response = await fetch(`${API_URL}/register`, {
                 method: 'POST',
@@ -41,14 +59,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) {
                 throw new Error(data.message || 'Erro ao cadastrar.');
             }
-            alert('Conta criada com sucesso! Por favor, faça o login.');
+
+            showToast('Conta criada com sucesso! Por favor, faça o login.', 'success');
             showLogin.click();
+
         } catch (error) {
             signupError.textContent = error.message;
         }
     });
 
-    // Lógica de Login conectada à API
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         loginError.textContent = '';
@@ -66,8 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             sessionStorage.setItem('loggedInUser', JSON.stringify(data.user));
             sessionStorage.setItem('authToken', data.token);
-            // Redireciona para o dashboard principal
-            window.location.href = '/index.html';
+            window.location.href = '/dashboard';
         } catch (error) {
             loginError.textContent = error.message;
         }
