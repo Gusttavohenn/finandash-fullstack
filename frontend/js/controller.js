@@ -108,7 +108,7 @@ class Controller {
     }
     handleSaveSettings = (newName) => { /* A lógica para salvar o nome ainda pode ser local/rápida, sem await */ alert('Nome salvo. Será atualizado na próxima vez que você logar.'); }
     handleClearAllData = async () => { await this.model.clearAllData(); this.onDataChanged(); }
-    handleLogout = () => { sessionStorage.clear(); window.location.href = 'login.html'; }
+    handleLogout = () => { sessionStorage.clear(); window.location.href = '/login'; }
     
     handleUpdateBudget = async (category, amount) => { await this.model.updateBudget(category, amount); this.onDataChanged(); }
     handleDeleteBudget = async (category) => { await this.model.deleteBudget(category); this.onDataChanged(); }

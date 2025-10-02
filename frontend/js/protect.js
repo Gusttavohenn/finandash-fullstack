@@ -5,5 +5,5 @@ const loggedInUser = sessionStorage.getItem('loggedInUser');
 
 if (!loggedInUser) {
     // Se não encontrou dados do usuário, volta para o login
-    window.location.href = 'login.html';
+    window.location.href = '/login'
 }
