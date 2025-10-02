@@ -1,0 +1,9 @@
+# Ignorar pastas de dependências
+frontend/node_modules/
+backend/node_modules/
+
+# Ignorar arquivos de ambiente do backend
+backend/.env
+
+# Ignorar o arquivo do banco de dados local
+backend/data/finandash.db
