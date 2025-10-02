@@ -61,14 +61,26 @@ class View {
 
     renderTransactionsTable(transactions) {
         this.transactionsTableBody.innerHTML = '';
-        if (transactions.length === 0) { this.transactionsTableBody.insertRow().innerHTML = `<td colspan="5" style="text-align: center;">Nenhuma transação encontrada.</td>`; return; }
-        transactions.forEach(t => { const d = new Date(t.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' }); this.transactionsTableBody.insertRow().innerHTML = `<td>${t.description}</td><td>${d}</td><td class="${t.type}">${this._formatCurrency(t.amount)}</td><td>${t.category}</td><td>${t.paymentMethod || '---'}</td>`; });
+        if (transactions.length === 0) { 
+            this.transactionsTableBody.insertRow().innerHTML = `<td colspan="5" style="text-align: center;">Nenhuma transação encontrada.</td>`; 
+            return; 
+        }
+        transactions.forEach(t => { 
+            const d = new Date(t.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' }); 
+            this.transactionsTableBody.insertRow().innerHTML = `<td>${t.description}</td><td>${d}</td><td class="${t.type}">${this._formatCurrency(t.amount)}</td><td>${t.category}</td><td>${t.paymentmethod || '---'}</td>`; 
+        });
     }
 
     renderFullTransactionsTable(transactions) {
         this.fullTransactionsTableBody.innerHTML = '';
-        if (transactions.length === 0) { this.fullTransactionsTableBody.insertRow().innerHTML = `<td colspan="6" style="text-align: center;">Nenhuma transação encontrada para os filtros selecionados.</td>`; return; }
-        transactions.forEach(t => { const d = new Date(t.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' }); this.fullTransactionsTableBody.insertRow().innerHTML = `<td>${t.description}</td><td>${d}</td><td class="${t.type}">${this._formatCurrency(t.amount)}</td><td>${t.category}</td><td>${t.paymentMethod || '---'}</td><td><button class="action-btn edit" data-id="${t.id}"><i class="fas fa-edit"></i></button><button class="action-btn delete" data-id="${t.id}"><i class="fas fa-trash"></i></button></td>`; });
+        if (transactions.length === 0) { 
+            this.fullTransactionsTableBody.insertRow().innerHTML = `<td colspan="6" style="text-align: center;">Nenhuma transação encontrada para os filtros selecionados.</td>`; 
+            return; 
+        }
+        transactions.forEach(t => { 
+            const d = new Date(t.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' }); 
+            this.fullTransactionsTableBody.insertRow().innerHTML = `<td>${t.description}</td><td>${d}</td><td class="${t.type}">${this._formatCurrency(t.amount)}</td><td>${t.category}</td><td>${t.paymentmethod || '---'}</td><td><button class="action-btn edit" data-id="${t.id}"><i class="fas fa-edit"></i></button><button class="action-btn delete" data-id="${t.id}"><i class="fas fa-trash"></i></button></td>`; 
+        });
     }
 
     renderChart(expensesByCategory) {
@@ -131,29 +143,30 @@ class View {
 
     showPage(pageId) { this.pages.forEach(p => p.classList.add('page-hidden')); document.getElementById(`${pageId}-page`).classList.remove('page-hidden'); this.updateMenuActiveState(pageId); }
     updateMenuActiveState(pageId) { this.menuItems.forEach(i => { i.classList.remove('active'); if (i.dataset.page === pageId) i.classList.add('active'); }); }
-toggleModal(show = true, transaction = null) { 
-    if (show) { 
-        this.transactionForm.reset(); 
-        if (transaction) { 
-            this.modalTitle.textContent = 'Editar Transação'; 
-            this.transactionForm['transaction-id'].value = transaction.id; 
-            this.transactionForm.description.value = transaction.description; 
-            this.transactionForm.amount.value = Math.abs(transaction.amount); 
-            this.transactionForm.date.value = transaction.date; 
-            this.transactionForm.category.value = transaction.category; 
-            this.transactionForm.type.value = transaction.type; 
-            this.paymentMethodGroup.style.display = transaction.type === 'expense' ? 'block' : 'none'; 
-            if (transaction.type === 'expense') this.paymentMethodSelect.value = transaction.paymentmethod || ''; 
+    toggleModal(show = true, transaction = null) { 
+        if (show) { 
+            this.transactionForm.reset(); 
+            if (transaction) { 
+                this.modalTitle.textContent = 'Editar Transação'; 
+                this.transactionForm['transaction-id'].value = transaction.id; 
+                this.transactionForm.description.value = transaction.description; 
+                this.transactionForm.amount.value = Math.abs(transaction.amount); 
+                this.transactionForm.date.value = transaction.date; 
+                this.transactionForm.category.value = transaction.category; 
+                this.transactionForm.type.value = transaction.type; 
+                this.paymentMethodGroup.style.display = transaction.type === 'expense' ? 'block' : 'none'; 
+                if (transaction.type === 'expense') this.paymentMethodSelect.value = transaction.paymentmethod || ''; 
+            } else { 
+                this.modalTitle.textContent = 'Nova Transação'; 
+                this.transactionForm['transaction-id'].value = ''; 
+                this.paymentMethodGroup.style.display = this.transactionTypeSelect.value === 'expense' ? 'block' : 'none'; 
+            } 
+            this.modal.classList.remove('page-hidden'); 
         } else { 
-            this.modalTitle.textContent = 'Nova Transação'; 
-            this.transactionForm['transaction-id'].value = ''; 
-            this.paymentMethodGroup.style.display = this.transactionTypeSelect.value === 'expense' ? 'block' : 'none'; 
+            this.modal.classList.add('page-hidden'); 
         } 
-        this.modal.classList.remove('page-hidden'); 
-    } else { 
-        this.modal.classList.add('page-hidden'); 
-    } 
-}    displayUserSettings(settings) { if (settings.name) { this.userNameInputEl.value = settings.name; this.userNameHeaderEl.textContent = settings.name; } }
+    }
+    displayUserSettings(settings) { if (settings.name) { this.userNameInputEl.value = settings.name; this.userNameHeaderEl.textContent = settings.name; } }
     hideConfirmationModal() { this.confirmationModal.classList.add('page-hidden'); }
     showConfirmationModal(message, onConfirm) { this.confirmationMessage.textContent = message; this.confirmationModal.classList.remove('page-hidden'); this.confirmActionBtn.onclick = () => { onConfirm(); this.hideConfirmationModal(); }; }
     showToast(message, type = 'success') { const t = document.createElement('div'); t.className = `toast ${type}`; t.textContent = message; this.toastContainer.appendChild(t); setTimeout(() => { t.remove(); }, 4000); }
