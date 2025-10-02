@@ -94,7 +94,7 @@ class Controller {
     handleEditTransaction = (id) => { const t = this.model.getTransactionById(id); if (t) this.view.toggleModal(true, t); }
     handleDeleteTransaction = async (id) => { await this.model.deleteTransaction(id); this.view.showToast('Transação excluída.'); this.onDataChanged(); }
     handleThemeToggle = () => { document.body.classList.toggle('dark-mode'); localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light'); }
-    handleSaveSettings = (newName) => {  this.view.showToast('Perfil salvo!'); }
+    handleSaveSettings = (newName) => { /* A lógica de salvar nome do usuário ainda é local */ this.view.showToast('Perfil salvo!'); }
     handleClearAllData = async () => { await this.model.clearAllData(); this.view.showToast('Todas as transações foram apagadas.'); this.onDataChanged(); }
     handleLogout = () => { sessionStorage.clear(); window.location.href = '/login'; }
     handleUpdateBudget = async (category, amount) => { await this.model.updateBudget(category, amount); this.view.showToast('Orçamento salvo!'); this.onDataChanged(); }

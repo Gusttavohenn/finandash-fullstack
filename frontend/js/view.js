@@ -1,4 +1,3 @@
-// --- VIEW ---
 console.log("View.js carregado.");
 
 class View {
@@ -112,21 +111,9 @@ class View {
             item.innerHTML = `<div class="reminder-item-info"><p>${r.description}${amountText}</p><span>Vencimento: ${dateText}</span></div><div class="reminder-item-actions"><i class="toggle-paid-btn fas ${r.ispaid ? 'fa-check-square' : 'fa-square'}" data-id="${r.id}" data-status="${r.ispaid}"></i><button data-id="${r.id}" class="delete-reminder-btn"><i class="fas fa-trash"></i></button></div>`;
             this.remindersList.appendChild(item);
         });
-        this.remindersList.querySelectorAll('.toggle-paid-btn').forEach(btn => {
-            btn.addEventListener('click', e => {
-                const id = parseInt(e.currentTarget.dataset.id);
-                const currentStatus = e.currentTarget.dataset.status === 'true';
-                updateHandler(id, !currentStatus);
-            });
-        });
-        this.remindersList.querySelectorAll('.delete-reminder-btn').forEach(btn => {
-            btn.addEventListener('click', e => {
-                const id = parseInt(e.currentTarget.dataset.id);
-                this.showConfirmationModal('Deseja excluir este lembrete?', () => deleteHandler(id));
-            });
-        });
+        this.remindersList.querySelectorAll('.toggle-paid-btn').forEach(btn => { btn.addEventListener('click', e => { const id = parseInt(e.currentTarget.dataset.id); const s = e.currentTarget.dataset.status === 'true'; updateHandler(id, !s); }); });
+        this.remindersList.querySelectorAll('.delete-reminder-btn').forEach(btn => { btn.addEventListener('click', e => { const id = parseInt(e.currentTarget.dataset.id); this.showConfirmationModal('Deseja excluir este lembrete?', () => deleteHandler(id)); }); });
     }
-
     renderDashboardReminders(reminders) {
         this.dashboardRemindersContainer.innerHTML = '';
         if (reminders.length === 0) { this.dashboardRemindersContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Você não tem lembretes próximos.</p>'; return; }

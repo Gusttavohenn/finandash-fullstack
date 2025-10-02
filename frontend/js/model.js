@@ -1,4 +1,3 @@
-// --- MODEL ---
 console.log("Model.js carregado.");
 
 class Model {
@@ -8,10 +7,10 @@ class Model {
         this.userSettings = { name: 'Usuário' };
         this.budgets = {};
         this.recurringTransactions = [];
-        this.reminders = []; // Propriedade para lembretes
+        this.reminders = [];
     }
 
-    // --- HELPER DE AUTENTICAÇÃO ---
+    // auth
     _getAuthHeaders() {
         const token = sessionStorage.getItem('authToken');
         return {
@@ -20,7 +19,6 @@ class Model {
         };
     }
 
-    // --- CARREGAMENTO INICIAL DE DADOS ---
     async loadInitialData() {
         try {
             await fetch(`${this.API_URL}/recurring/generate`, { method: 'POST', headers: this._getAuthHeaders() });
@@ -46,7 +44,7 @@ class Model {
         }
     }
 
-    // --- MANIPULAÇÃO VIA API ---
+    // manip API
     async addTransaction(data) { const res = await fetch(`${this.API_URL}/transactions`, { method: 'POST', headers: this._getAuthHeaders(), body: JSON.stringify(data) }); this.transactions.unshift(await res.json()); }
     async editTransaction(id, data) { const res = await fetch(`${this.API_URL}/transactions/${id}`, { method: 'PUT', headers: this._getAuthHeaders(), body: JSON.stringify(data) }); const updated = await res.json(); const index = this.transactions.findIndex(t => t.id === id); if (index !== -1) this.transactions[index] = updated; }
     async deleteTransaction(id) { await fetch(`${this.API_URL}/transactions/${id}`, { method: 'DELETE', headers: this._getAuthHeaders() }); this.transactions = this.transactions.filter(t => t.id !== id); }
@@ -59,7 +57,7 @@ class Model {
     async updateReminder(id, isPaid) { const res = await fetch(`${this.API_URL}/reminders/${id}`, { method: 'PUT', headers: this._getAuthHeaders(), body: JSON.stringify({ isPaid }) }); const updated = await res.json(); const index = this.reminders.findIndex(r => r.id === id); if (index !== -1) this.reminders[index] = updated; }
     async deleteReminder(id) { await fetch(`${this.API_URL}/reminders/${id}`, { method: 'DELETE', headers: this._getAuthHeaders() }); this.reminders = this.reminders.filter(r => r.id !== id); }
 
-    // --- MÉTODOS DE GET E CÁLCULO (LOCAIS) ---
+    // Get e calc
     getTransactions() { return this.transactions.sort((a, b) => new Date(b.date) - new Date(a.date)); }
     getBudgets() { return this.budgets; }
     getRecurringTransactions() { return this.recurringTransactions; }
