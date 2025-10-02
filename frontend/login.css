@@ -140,12 +140,29 @@ body {
     min-height: 1.2em;
 }
 
-/* Estilo do Rodapé */
 footer {
     position: absolute;
     bottom: 20px;
-    text-align: center;
+    left: 0;
     width: 100%;
+    text-align: center;
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: 0.8rem;
 }
+
+.social-links {
+    margin-top: 10px;
+}
+
+.social-links a {
+    color: var(--text-muted);
+    margin: 0 10px;
+    font-size: 1.5rem; /* Tamanho dos ícones */
+    transition: color 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.social-links a:hover {
+    color: var(--primary-color); /* Muda de cor ao passar o mouse */
+    transform: scale(1.1); /* Aumenta um pouco de tamanho */
+}
+
