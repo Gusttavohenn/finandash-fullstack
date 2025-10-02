@@ -140,144 +140,93 @@ body {
 .progress-bar { height: 100%; background-color: var(--primary-color); border-radius: 8px; transition: width 0.5s ease-in-out; }
 .progress-bar.over-budget { background-color: var(--expense-color); }
 
-@media (max-width: 768px) {
-    body {
-        font-size: 14px;
-    }
-
-    .main-container {
-        flex-direction: column;
-    }
-
-    .sidebar {
-        width: 100%; 
-        height: auto; 
-        padding: 10px;
-        flex-direction: row;
-        justify-content: space-around; 
-        border-bottom: 1px solid var(--border-color); 
-        position: fixed; 
-        top: 0;
-        left: 0;
-        z-index: 1000; 
-        background-color: var(--sidebar-bg-color);
-    }
-
-    .sidebar .logo-section {
-        display: none;
-    }
-
-    .sidebar .nav-list {
-        flex-direction: row;
-        width: 100%;
-        justify-content: space-around;
-    }
-
-    .sidebar .nav-list li {
-        margin: 0;
-    }
-
-    .sidebar .nav-list a {
-        padding: 8px 10px; 
-        font-size: 12px;
-        border-radius: 5px;
-        white-space: nowrap;
-    }
-
-    .sidebar .nav-list a .icon {
-        margin-right: 5px; 
-    }
-
-    .content {
-        margin-left: 0; 
-        padding-top: 60px;
-        padding: 10px;
-    }
-
-    .content-header {
-        flex-direction: column;
-        align-items: flex-start; 
-        margin-bottom: 15px;
-    }
-
-    .content-header h1 {
-        font-size: 1.5em;
-        margin-bottom: 10px;
-    }
-
-    .header-actions, .header-user-info {
-        width: 100%;
-        justify-content: space-between;
-        flex-wrap: wrap;
-    }
-
-    .header-actions button, .header-actions select {
-        flex-grow: 1;
-        margin: 5px;
-    }
-
-    .header-user-info {
-        margin-top: 10px;
-    }
-
-    .summary-cards, .dashboard-grid {
+@media (max-width: 1200px) {
+    .data-section {
         grid-template-columns: 1fr;
-        gap: 15px;
-    }
-
-    .summary-card {
-        padding: 15px;
-        flex-direction: row;
-        align-items: center;
-        justify-content: flex-start;
-    }
-
-    .summary-card .icon-wrapper {
-        margin-right: 15px;
-        min-width: 40px; 
-        min-height: 40px;
-        font-size: 1.5em;
-    }
-
-    .summary-card .value {
-        font-size: 1.2em;
-    }
-
-    .chart-container {
-        padding: 15px;
-        max-height: 250px;
-    }
-
-    #category-chart {
-        height: 200px !important;
-        width: 200px !important;
-        margin: 0 auto;
-        display: block;
-    }
-
-    .full-transactions-list, .data-section-single-col {
-        overflow-x: auto;
-    }
-
-    #full-transactions-table, #transactions-table {
-        white-space: nowrap; 
-        width: 100%; 
-        min-width: 600px; 
-    }
-
-    #full-transactions-table th, #transactions-table th,
-    #full-transactions-table td, #transactions-table td {
-        padding: 8px 10px; 
-        font-size: 0.85em; 
-    }
-
-    .transaction-actions {
-        min-width: 80px;
     }
 }
 
 @media (max-width: 768px) {
-    .header-user-info .user-name {
-        display: none;
+    .dashboard-container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: 60px; 
+        flex-direction: row;
+        align-items: center;
+        padding: 0 15px;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1001;
+    }
+    
+    .sidebar-header .logo { 
+        margin: 0;
+        font-size: 1.2rem;
+    }
+
+    .sidebar-header .logo span { display: none; }
+    
+    .sidebar-menu { 
+        display: flex;
+        flex-direction: row;
+        margin-left: auto;
+        gap: 5px;
+    }
+
+    .sidebar-menu .menu-item { 
+        margin: 0;
+        padding: 8px; 
+    }
+
+    .sidebar-menu .menu-item span { display: none; }
+    .sidebar-menu .logout { display: none; } 
+
+    .main-content {
+        padding: 15px;
+        margin-top: 60px; 
+    }
+    
+    .main-header {
+        flex-direction: column; 
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .header-title {
+        width: 100%;
+    }
+
+    .main-header h2 { 
+        font-size: 1.6rem;
+    }
+
+    .chart-container {
+        height: 300px;
+    }
+
+    .filter-bar {
+        flex-wrap: wrap; 
+    }
+    .filter-input {
+        width: 100%; 
+        flex-grow: unset;
+    }
+    .filter-select {
+        flex-grow: 1; 
+    }
+    
+    .full-transactions-list, .data-section-single-col {
+        overflow-x: auto; 
+    }
+
+    #full-transactions-table, #transactions-table {
+        white-space: nowrap;
+        min-width: 600px; 
     }
 }
