@@ -1,59 +1,26 @@
-require('dotenv').config(); // Carrega as variáveis do arquivo .env no início de tudo
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const db = require('./db.js'); // Importa nossa nova conexão com o PostgreSQL
+const db = require('./db.js');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'segredo-local-para-desenvolvimento-e-testes';
+const JWT_SECRET = process.env.JWT_SECRET || 'segredo-local-para-dev';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors({ origin: 'https://finandash-fullstack.vercel.app' })); 
+app.use(cors({ origin: "https://finandash-fullstack.vercel.app" }));
 app.use(express.json());
 
 const createTables = async () => {
     const query = `
-        CREATE TABLE IF NOT EXISTS users (
-            id SERIAL PRIMARY KEY,
-            name VARCHAR(100) NOT NULL,
-            email VARCHAR(100) UNIQUE NOT NULL,
-            password VARCHAR(100) NOT NULL
-        );
-        CREATE TABLE IF NOT EXISTS transactions (
-            id SERIAL PRIMARY KEY,
-            description VARCHAR(255) NOT NULL,
-            amount NUMERIC(10, 2) NOT NULL,
-            date DATE NOT NULL,
-            type VARCHAR(50) NOT NULL,
-            category VARCHAR(100) NOT NULL,
-            paymentMethod VARCHAR(100),
-            userId INTEGER REFERENCES users(id) ON DELETE CASCADE
-        );
-        CREATE TABLE IF NOT EXISTS budgets (
-            id SERIAL PRIMARY KEY,
-            category VARCHAR(100) NOT NULL,
-            amount NUMERIC(10, 2) NOT NULL,
-            userId INTEGER REFERENCES users(id) ON DELETE CASCADE,
-            UNIQUE(category, userId)
-        );
-        CREATE TABLE IF NOT EXISTS recurring_transactions (
-            id SERIAL PRIMARY KEY,
-            description VARCHAR(255) NOT NULL,
-            amount NUMERIC(10, 2) NOT NULL,
-            dayOfMonth INTEGER NOT NULL,
-            category VARCHAR(100) NOT NULL,
-            type VARCHAR(50) NOT NULL,
-            lastGenerated VARCHAR(7),
-            userId INTEGER REFERENCES users(id) ON DELETE CASCADE
-        );
+        CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, name VARCHAR(100) NOT NULL, email VARCHAR(100) UNIQUE NOT NULL, password VARCHAR(100) NOT NULL);
+        CREATE TABLE IF NOT EXISTS transactions (id SERIAL PRIMARY KEY, description VARCHAR(255) NOT NULL, amount NUMERIC(10, 2) NOT NULL, date DATE NOT NULL, type VARCHAR(50) NOT NULL, category VARCHAR(100) NOT NULL, paymentMethod VARCHAR(100), userId INTEGER REFERENCES users(id) ON DELETE CASCADE);
+        CREATE TABLE IF NOT EXISTS budgets (id SERIAL PRIMARY KEY, category VARCHAR(100) NOT NULL, amount NUMERIC(10, 2) NOT NULL, userId INTEGER REFERENCES users(id) ON DELETE CASCADE, UNIQUE(category, userId));
+        CREATE TABLE IF NOT EXISTS recurring_transactions (id SERIAL PRIMARY KEY, description VARCHAR(255) NOT NULL, amount NUMERIC(10, 2) NOT NULL, dayOfMonth INTEGER NOT NULL, category VARCHAR(100) NOT NULL, type VARCHAR(50) NOT NULL, lastGenerated VARCHAR(7), userId INTEGER REFERENCES users(id) ON DELETE CASCADE);
+        CREATE TABLE IF NOT EXISTS reminders (id SERIAL PRIMARY KEY, description VARCHAR(255) NOT NULL, amount NUMERIC(10, 2), dueDate DATE NOT NULL, isPaid BOOLEAN DEFAULT false, userId INTEGER REFERENCES users(id) ON DELETE CASCADE);
     `;
-    try {
-        await db.query(query);
-        console.log("Tabelas verificadas/criadas com sucesso.");
-    } catch (err) {
-        console.error("Erro ao criar tabelas:", err);
-    }
+    try { await db.query(query); console.log("Tabelas verificadas/criadas."); } catch (err) { console.error("Erro ao criar tabelas:", err); }
 };
 
 const authenticateToken = (req, res, next) => {
@@ -191,6 +158,32 @@ app.post('/api/recurring/generate', authenticateToken, async (req, res) => {
     }
     res.status(200).json({ message: `${result.rows.length} transações recorrentes geradas.` });
 });
+
+// rotas para lembrete
+app.get('/api/reminders', authenticateToken, async (req, res) => {
+    const result = await db.query("SELECT * FROM reminders WHERE userId = $1 ORDER BY dueDate ASC", [req.user.id]);
+    res.json(result.rows);
+});
+
+app.post('/api/reminders', authenticateToken, async (req, res) => {
+    const { description, amount, dueDate } = req.body;
+    const result = await db.query(`INSERT INTO reminders (description, amount, dueDate, userId) VALUES ($1, $2, $3, $4) RETURNING *`, [description, amount, dueDate, req.user.id]);
+    res.status(201).json(result.rows[0]);
+});
+
+app.put('/api/reminders/:id', authenticateToken, async (req, res) => {
+    const { isPaid } = req.body;
+    const result = await db.query(`UPDATE reminders SET isPaid = $1 WHERE id = $2 AND userId = $3 RETURNING *`, [isPaid, req.params.id, req.user.id]);
+    if (result.rows.length === 0) return res.status(404).json({ message: "Lembrete não encontrado." });
+    res.json(result.rows[0]);
+});
+
+app.delete('/api/reminders/:id', authenticateToken, async (req, res) => {
+    const result = await db.query("DELETE FROM reminders WHERE id = $1 AND userId = $2", [req.params.id, req.user.id]);
+    if (result.rowCount === 0) return res.status(404).json({ message: "Lembrete não encontrado." });
+    res.sendStatus(204);
+});
+
 
 // inicia para debug
 app.listen(PORT, () => {

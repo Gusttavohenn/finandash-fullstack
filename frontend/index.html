@@ -21,6 +21,7 @@
                 <a href="#" class="menu-item active" data-page="dashboard"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
                 <a href="#" class="menu-item" data-page="transactions"><i class="fas fa-exchange-alt"></i><span>Transações</span></a>
                 <a href="#" class="menu-item" data-page="budgets"><i class="fas fa-bullseye"></i><span>Orçamentos</span></a>
+                <a href="#" class="menu-item" data-page="reminders"><i class="fas fa-bell"></i><span>Lembretes</span></a>
                 <a href="#" class="menu-item" data-page="recurring"><i class="fas fa-sync-alt"></i><span>Recorrentes</span></a>
                 <a href="#" class="menu-item" data-page="settings"><i class="fas fa-cog"></i><span>Configurações</span></a>
                 <a href="#" class="menu-item logout"><i class="fas fa-sign-out-alt"></i><span>Sair</span></a>
@@ -50,6 +51,10 @@
                     <div class="card"><i class="fas fa-dollar-sign card-icon income"></i><div class="card-info"><h4>Receita Total</h4><p id="total-revenue">R$ 0,00</p></div></div>
                     <div class="card"><i class="fas fa-shopping-cart card-icon expense"></i><div class="card-info"><h4>Despesas Totais</h4><p id="total-expenses">R$ 0,00</p></div></div>
                     <div class="card"><i class="fas fa-balance-scale card-icon balance"></i><div class="card-info"><h4>Balanço</h4><p id="balance">R$ 0,00</p></div></div>
+                </section>
+                <section id="reminders-overview" class="data-section-single-col">
+                    <h3>Lembretes Próximos</h3>
+                    <div id="dashboard-reminders-container"></div>
                 </section>
                 <section id="budgets-overview" class="data-section-single-col">
                     <h3>Progresso dos Orçamentos (Este Mês)</h3>
@@ -113,20 +118,33 @@
                 <div class="settings-card">
                     <h3>Definir Limites por Categoria</h3>
                     <form id="budget-form">
-                        <div class="form-group">
-                            <label for="budget-category">Categoria</label>
-                            <input type="text" id="budget-category" placeholder="Ex: Alimentação" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="budget-amount">Valor do Orçamento (R$)</label>
-                            <input type="number" id="budget-amount" placeholder="Ex: 500" required step="0.01" min="0">
-                        </div>
+                        <div class="form-group"><label for="budget-category">Categoria</label><input type="text" id="budget-category" placeholder="Ex: Alimentação" required></div>
+                        <div class="form-group"><label for="budget-amount">Valor do Orçamento (R$)</label><input type="number" id="budget-amount" placeholder="Ex: 500" required step="0.01" min="0"></div>
                         <button type="submit" class="btn-primary">Salvar Orçamento</button>
                     </form>
                 </div>
                 <div class="full-transactions-list">
                     <h3>Orçamentos Salvos</h3>
                     <div id="budgets-list"></div>
+                </div>
+            </section>
+
+            <section id="reminders-page" class="page-content page-hidden">
+                <header class="main-header">
+                   <h2>Lembretes de Pagamento</h2>
+                </header>
+                <div class="settings-card">
+                    <h3>Adicionar Novo Lembrete</h3>
+                    <form id="reminder-form">
+                        <div class="form-group"><label for="reminder-description">Descrição</label><input type="text" id="reminder-description" placeholder="Ex: Fatura Cartão, Conta de Luz" required></div>
+                        <div class="form-group"><label for="reminder-amount">Valor (R$, opcional)</label><input type="number" id="reminder-amount" step="0.01" min="0" placeholder="Ex: 150.75"></div>
+                        <div class="form-group"><label for="reminder-dueDate">Data de Vencimento</label><input type="date" id="reminder-dueDate" required></div>
+                        <button type="submit" class="btn-primary">Salvar Lembrete</button>
+                    </form>
+                </div>
+                <div class="full-transactions-list">
+                    <h3>Meus Lembretes</h3>
+                    <div id="reminders-list"></div>
                 </div>
             </section>
 
@@ -138,28 +156,13 @@
                     <h3>Cadastrar Nova Transação Recorrente</h3>
                     <p>Transações cadastradas aqui serão criadas automaticamente todo mês.</p>
                     <form id="recurring-form">
-                        <div class="form-group">
-                            <label for="recurring-description">Descrição</label>
-                            <input type="text" id="recurring-description" placeholder="Ex: Salário, Aluguel" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="recurring-amount">Valor (R$)</label>
-                            <input type="number" id="recurring-amount" placeholder="Ex: 1200" required step="0.01" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label for="recurring-day">Dia do Mês para Lançamento</label>
-                            <input type="number" id="recurring-day" placeholder="Ex: 5" required min="1" max="31">
-                        </div>
-                        <div class="form-group">
-                            <label for="recurring-category">Categoria</label>
-                            <input type="text" id="recurring-category" placeholder="Ex: Salário, Moradia" required>
-                        </div>
+                        <div class="form-group"><label for="recurring-description">Descrição</label><input type="text" id="recurring-description" placeholder="Ex: Salário, Aluguel" required></div>
+                        <div class="form-group"><label for="recurring-amount">Valor (R$)</label><input type="number" id="recurring-amount" placeholder="Ex: 1200" required step="0.01" min="0"></div>
+                        <div class="form-group"><label for="recurring-day">Dia do Mês para Lançamento</label><input type="number" id="recurring-day" placeholder="Ex: 5" required min="1" max="31"></div>
+                        <div class="form-group"><label for="recurring-category">Categoria</label><input type="text" id="recurring-category" placeholder="Ex: Salário, Moradia" required></div>
                         <div class="form-group">
                             <label for="recurring-type">Tipo</label>
-                            <select id="recurring-type" required>
-                                <option value="income">Receita</option>
-                                <option value="expense">Despesa</option>
-                            </select>
+                            <select id="recurring-type" required><option value="income">Receita</option><option value="expense">Despesa</option></select>
                         </div>
                         <button type="submit" class="btn-primary">Salvar Transação Recorrente</button>
                     </form>
@@ -175,12 +178,13 @@
                 <div class="settings-card">
                     <h3>Perfil do Usuário</h3>
                     <form id="profile-form">
-                        <div class="form-group">
-                            <label for="user-name">Seu Nome</label>
-                            <input type="text" id="user-name" placeholder="Digite seu nome" required>
-                        </div>
+                        <div class="form-group"><label for="user-name">Seu Nome</label><input type="text" id="user-name" placeholder="Digite seu nome" required></div>
                         <button type="submit" class="btn-primary">Salvar Perfil</button>
                     </form>
+                </div>
+                <div class="settings-card">
+                    <h3>Sessão</h3>
+                    <button id="logout-btn-page" class="btn-danger">Sair da Conta</button>
                 </div>
                 <div class="settings-card danger-zone">
                     <h3>Zona de Perigo</h3>
@@ -202,26 +206,16 @@
                 <div class="form-group"><label for="category">Categoria</label><input type="text" id="category" required></div>
                 <div class="form-group">
                     <label for="type">Tipo</label>
-                    <select id="type" required>
-                        <option value="expense">Despesa</option>
-                        <option value="income">Receita</option>
-                    </select>
+                    <select id="type" required><option value="expense">Despesa</option><option value="income">Receita</option></select>
                 </div>
                 <div class="form-group" id="payment-method-group">
                     <label for="payment-method">Método de Pagamento</label>
                     <select id="payment-method">
-                        <option value="Pix">Pix</option>
-                        <option value="Cartão de Crédito">Cartão de Crédito</option>
-                        <option value="Cartão de Débito">Cartão de Débito</option>
-                        <option value="Dinheiro">Dinheiro</option>
-                        <option value="Boleto">Boleto</option>
-                        <option value="Transferência">Transferência</option>
+                        <option value="Pix">Pix</option><option value="Cartão de Crédito">Cartão de Crédito</option><option value="Cartão de Débito">Cartão de Débito</option>
+                        <option value="Dinheiro">Dinheiro</option><option value="Boleto">Boleto</option><option value="Transferência">Transferência</option>
                     </select>
                 </div>
-                <div class="form-actions">
-                    <button type="button" id="cancel-btn" class="btn-secondary">Cancelar</button>
-                    <button type="submit" class="btn-primary">Salvar</button>
-                </div>
+                <div class="form-actions"><button type="button" id="cancel-btn" class="btn-secondary">Cancelar</button><button type="submit" class="btn-primary">Salvar</button></div>
             </form>
         </div>
     </div>
@@ -229,13 +223,10 @@
         <div class="modal-content">
             <h3 id="confirmation-title">Confirmar Ação</h3>
             <p id="confirmation-message">Você tem certeza que deseja executar esta ação?</p>
-            <div class="form-actions">
-                <button id="cancel-confirmation-btn" class="btn-secondary">Cancelar</button>
-                <button id="confirm-action-btn" class="btn-danger">Sim, Excluir</button>
-            </div>
+            <div class="form-actions"><button id="cancel-confirmation-btn" class="btn-secondary">Cancelar</button><button id="confirm-action-btn" class="btn-danger">Sim, Excluir</button></div>
         </div>
     </div>
-
+    
     <div id="toast-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

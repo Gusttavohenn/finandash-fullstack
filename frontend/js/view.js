@@ -1,3 +1,6 @@
+// --- VIEW ---
+console.log("View.js carregado.");
+
 class View {
     constructor() {
         this.totalRevenueEl = document.getElementById('total-revenue');
@@ -44,6 +47,9 @@ class View {
         this.recurringForm = document.getElementById('recurring-form');
         this.recurringList = document.getElementById('recurring-list');
         this.toastContainer = document.getElementById('toast-container');
+        this.remindersList = document.getElementById('reminders-list');
+        this.reminderForm = document.getElementById('reminder-form');
+        this.dashboardRemindersContainer = document.getElementById('dashboard-reminders-container');
     }
 
     _formatCurrency(value) { return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
@@ -91,8 +97,51 @@ class View {
     
     renderPagination(currentPage, totalPages) { if (totalPages <= 1) { this.paginationControls.style.display = 'none'; return; } this.paginationControls.style.display = 'flex'; this.pageInfo.textContent = `Página ${currentPage} de ${totalPages}`; this.prevPageBtn.disabled = currentPage === 1; this.nextPageBtn.disabled = currentPage === totalPages; }
     renderBudgetsPage(budgets, deleteHandler) { this.budgetsList.innerHTML = ''; if (Object.keys(budgets).length === 0) { this.budgetsList.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Nenhum orçamento definido.</p>'; return; } Object.entries(budgets).forEach(([category, amount]) => { this.budgetsList.innerHTML += `<div class="budget-item"><div class="budget-item-info"><p>${category}</p><span>Limite: ${this._formatCurrency(amount)}</span></div><div class="budget-item-actions"><button data-category="${category}" class="delete-budget-btn"><i class="fas fa-trash"></i></button></div></div>`; }); this.budgetsList.querySelectorAll('.delete-budget-btn').forEach(btn => btn.addEventListener('click', e => deleteHandler(e.currentTarget.dataset.category))); }
-    renderDashboardBudgets(budgetsStatus) { this.dashboardBudgetsContainer.innerHTML = ''; if (budgetsStatus.length === 0) { this.dashboardBudgetsContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Defina seus orçamentos na página "Orçamentos" para ver seu progresso aqui.</p>'; return; } budgetsStatus.forEach(item => { const p = Math.min(item.percentage, 100); const o = item.percentage > 100; this.dashboardBudgetsContainer.innerHTML += `<div class="budget-item-info"><div style="display: flex; justify-content: space-between;"><p>${item.category}</p><span>${this._formatCurrency(item.spent)} / ${this._formatCurrency(item.budget)}</span></div><div class="progress-bar-container"><div class="progress-bar ${o ? 'over-budget' : ''}" style="width: ${p}%;"></div></div></div>`; }); }
+    renderDashboardBudgets(budgetsStatus) { this.dashboardBudgetsContainer.innerHTML = ''; if (budgetsStatus.length === 0) { this.dashboardBudgetsContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Defina orçamentos para ver seu progresso aqui.</p>'; return; } budgetsStatus.forEach(item => { const p = Math.min(item.percentage, 100); const o = item.percentage > 100; this.dashboardBudgetsContainer.innerHTML += `<div class="budget-item-info"><div style="display: flex; justify-content: space-between;"><p>${item.category}</p><span>${this._formatCurrency(item.spent)} / ${this._formatCurrency(item.budget)}</span></div><div class="progress-bar-container"><div class="progress-bar ${o ? 'over-budget' : ''}" style="width: ${p}%;"></div></div></div>`; }); }
     renderRecurringTransactionsPage(recurringTxs, deleteHandler) { this.recurringList.innerHTML = ''; if (recurringTxs.length === 0) { this.recurringList.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Nenhuma transação recorrente definida.</p>'; return; } recurringTxs.forEach(rt => { const t = rt.type === 'income' ? 'Receita' : 'Despesa'; this.recurringList.innerHTML += `<div class="recurring-item"><div class="recurring-item-info"><p>${rt.description} (${t})</p><span>${this._formatCurrency(rt.amount)} todo dia ${rt.dayOfMonth}</span></div><div class="recurring-item-actions"><button data-id="${rt.id}" class="delete-recurring-btn"><i class="fas fa-trash"></i></button></div></div>`; }); this.recurringList.querySelectorAll('.delete-recurring-btn').forEach(btn => btn.addEventListener('click', e => deleteHandler(parseInt(e.currentTarget.dataset.id)))); }
+    renderRemindersPage(reminders, updateHandler, deleteHandler) {
+        this.remindersList.innerHTML = '';
+        if (reminders.length === 0) { this.remindersList.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Nenhum lembrete cadastrado.</p>'; return; }
+        reminders.forEach(r => {
+            const dueDate = new Date(r.duedate); const today = new Date(); today.setHours(0,0,0,0);
+            const isOverdue = dueDate < today && !r.ispaid;
+            const item = document.createElement('div');
+            item.className = `reminder-item ${r.ispaid ? 'is-paid' : ''} ${isOverdue ? 'is-overdue' : ''}`;
+            const amountText = r.amount ? ` - ${this._formatCurrency(parseFloat(r.amount))}` : '';
+            const dateText = dueDate.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+            item.innerHTML = `<div class="reminder-item-info"><p>${r.description}${amountText}</p><span>Vencimento: ${dateText}</span></div><div class="reminder-item-actions"><i class="toggle-paid-btn fas ${r.ispaid ? 'fa-check-square' : 'fa-square'}" data-id="${r.id}" data-status="${r.ispaid}"></i><button data-id="${r.id}" class="delete-reminder-btn"><i class="fas fa-trash"></i></button></div>`;
+            this.remindersList.appendChild(item);
+        });
+        this.remindersList.querySelectorAll('.toggle-paid-btn').forEach(btn => {
+            btn.addEventListener('click', e => {
+                const id = parseInt(e.currentTarget.dataset.id);
+                const currentStatus = e.currentTarget.dataset.status === 'true';
+                updateHandler(id, !currentStatus);
+            });
+        });
+        this.remindersList.querySelectorAll('.delete-reminder-btn').forEach(btn => {
+            btn.addEventListener('click', e => {
+                const id = parseInt(e.currentTarget.dataset.id);
+                this.showConfirmationModal('Deseja excluir este lembrete?', () => deleteHandler(id));
+            });
+        });
+    }
+
+    renderDashboardReminders(reminders) {
+        this.dashboardRemindersContainer.innerHTML = '';
+        if (reminders.length === 0) { this.dashboardRemindersContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Você não tem lembretes próximos.</p>'; return; }
+        reminders.forEach(r => {
+            const dueDate = new Date(r.duedate); const today = new Date(); today.setHours(0,0,0,0);
+            const isOverdue = dueDate < today;
+            const item = document.createElement('div');
+            item.className = `reminder-item ${isOverdue ? 'is-overdue' : ''}`;
+            const amountText = r.amount ? ` - ${this._formatCurrency(parseFloat(r.amount))}` : '';
+            const dateText = dueDate.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+            item.innerHTML = `<div class="reminder-item-info"><p>${r.description}${amountText}</p><span>Vencimento: ${dateText}</span></div>`;
+            this.dashboardRemindersContainer.appendChild(item);
+        });
+    }
+
     showPage(pageId) { this.pages.forEach(p => p.classList.add('page-hidden')); document.getElementById(`${pageId}-page`).classList.remove('page-hidden'); this.updateMenuActiveState(pageId); }
     updateMenuActiveState(pageId) { this.menuItems.forEach(i => { i.classList.remove('active'); if (i.dataset.page === pageId) i.classList.add('active'); }); }
     toggleModal(show = true, transaction = null) { if (show) { this.transactionForm.reset(); if (transaction) { this.modalTitle.textContent = 'Editar Transação'; this.transactionForm['transaction-id'].value = transaction.id; this.transactionForm.description.value = transaction.description; this.transactionForm.amount.value = Math.abs(transaction.amount); this.transactionForm.date.value = transaction.date; this.transactionForm.category.value = transaction.category; this.transactionForm.type.value = transaction.type; this.paymentMethodGroup.style.display = transaction.type === 'expense' ? 'block' : 'none'; if (transaction.type === 'expense') this.paymentMethodSelect.value = transaction.paymentMethod; } else { this.modalTitle.textContent = 'Nova Transação'; this.transactionForm['transaction-id'].value = ''; this.paymentMethodGroup.style.display = this.transactionTypeSelect.value === 'expense' ? 'block' : 'none'; } this.modal.classList.remove('page-hidden'); } else { this.modal.classList.add('page-hidden'); } }
@@ -108,6 +157,7 @@ class View {
     bindSubmitTransaction(h) { this.transactionForm.addEventListener('submit', e => { e.preventDefault(); const id = parseInt(this.transactionForm['transaction-id'].value); const d = { id: id || null, description: this.transactionForm.description.value, amount: parseFloat(this.transactionForm.amount.value), date: this.transactionForm.date.value, category: this.transactionForm.category.value, type: this.transactionForm.type.value, paymentMethod: this.transactionForm.type.value === 'expense' ? this.paymentMethodSelect.value : null }; h(d); this.toggleModal(false); }); }
     bindSaveSettings(h) { this.profileFormEl.addEventListener('submit', e => { e.preventDefault(); const n = this.userNameInputEl.value; if (n) h(n); }); }
     bindClearAllData(h) { this.clearDataBtnEl.addEventListener('click', () => this.showConfirmationModal('Você tem certeza que deseja apagar TODAS as suas transações? Esta ação não pode ser desfeita.', h)); }
+    bindLogout(h) { if (this.logoutBtn) this.logoutBtn.addEventListener('click', e => { e.preventDefault(); h(); }); if (this.logoutBtnPage) this.logoutBtnPage.addEventListener('click', e => { e.preventDefault(); h(); }); }
     bindTransactionTypeChange() { this.transactionTypeSelect.addEventListener('change', () => { this.paymentMethodGroup.style.display = (this.transactionTypeSelect.value === 'expense') ? 'block' : 'none'; }); }
     bindEditAndDeleteTransaction(editH, deleteH) { this.fullTransactionsTableBody.addEventListener('click', e => { const b = e.target.closest('.action-btn'); if (!b) return; const id = parseInt(b.dataset.id); if (b.classList.contains('edit')) editH(id); else if (b.classList.contains('delete')) this.showConfirmationModal('Você tem certeza que deseja excluir esta transação?', () => deleteH(id)); }); }
     bindConfirmationControls() { this.cancelConfirmationBtn.addEventListener('click', () => this.hideConfirmationModal()); this.confirmationModal.addEventListener('click', e => { if (e.target === this.confirmationModal) this.hideConfirmationModal(); }); }
@@ -115,27 +165,6 @@ class View {
     bindDashboardDateFilter(h) { this.dashboardDateFilter.addEventListener('change', h); }
     bindPagination(prevH, nextH) { this.prevPageBtn.addEventListener('click', prevH); this.nextPageBtn.addEventListener('click', nextH); }
     bindBudgetForm(h) { this.budgetForm.addEventListener('submit', e => { e.preventDefault(); const c = this.budgetForm['budget-category'].value; const a = parseFloat(this.budgetForm['budget-amount'].value); if (c && a >= 0) { h(c, a); this.budgetForm.reset(); } }); }
-    bindRecurringForm(h) {
-        this.recurringForm.addEventListener('submit', e => {
-            e.preventDefault();
-            const data = { description: this.recurringForm['recurring-description'].value, amount: parseFloat(this.recurringForm['recurring-amount'].value), dayOfMonth: parseInt(this.recurringForm['recurring-day'].value), category: this.recurringForm['recurring-category'].value, type: this.recurringForm['recurring-type'].value };
-            if (data.description && data.amount > 0 && data.dayOfMonth) { h(data); this.recurringForm.reset(); }
-        });
-    }
-
-    // CORREÇÃO FINAL
-    bindLogout(handler) {
-        if (this.logoutBtn) {
-            this.logoutBtn.addEventListener('click', e => {
-                e.preventDefault();
-                handler();
-            });
-        }
-        if (this.logoutBtnPage) {
-            this.logoutBtnPage.addEventListener('click', e => {
-                e.preventDefault();
-                handler();
-            });
-        }
-    }
+    bindRecurringForm(h) { this.recurringForm.addEventListener('submit', e => { e.preventDefault(); const d = { description: this.recurringForm['recurring-description'].value, amount: parseFloat(this.recurringForm['recurring-amount'].value), dayOfMonth: parseInt(this.recurringForm['recurring-day'].value), category: this.recurringForm['recurring-category'].value, type: this.recurringForm['recurring-type'].value }; if (d.description && d.amount > 0 && d.dayOfMonth) { h(d); this.recurringForm.reset(); } }); }
+    bindReminderForm(h) { this.reminderForm.addEventListener('submit', e => { e.preventDefault(); const d = { description: this.reminderForm['reminder-description'].value, amount: this.reminderForm['reminder-amount'].value ? parseFloat(this.reminderForm['reminder-amount'].value) : null, dueDate: this.reminderForm['reminder-dueDate'].value }; if (d.description && d.dueDate) { h(d); this.reminderForm.reset(); } }); }
 }
