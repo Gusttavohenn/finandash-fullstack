@@ -1,4 +1,3 @@
-// --- VIEW ---
 console.log("View.js carregado.");
 
 class View {

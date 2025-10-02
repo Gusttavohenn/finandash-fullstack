@@ -1,9 +1,8 @@
-// --- MODEL ---
 console.log("Model.js carregado.");
 
 class Model {
     constructor() {
-        // URL final da sua API na Render
+        // URL final
         this.API_URL = 'https://finandash-api-gustavo.onrender.com/api';
         this.transactions = [];
         this.userSettings = { name: 'Usuário' };
@@ -11,7 +10,7 @@ class Model {
         this.recurringTransactions = [];
     }
 
-    // --- HELPER DE AUTENTICAÇÃO ---
+    // autenticacao
     _getAuthHeaders() {
         const token = sessionStorage.getItem('authToken');
         return {
@@ -20,13 +19,10 @@ class Model {
         };
     }
 
-    // --- CARREGAMENTO INICIAL DE DADOS ---
     async loadInitialData() {
         try {
-            // Pede ao backend para gerar transações recorrentes devidas
             await fetch(`${this.API_URL}/recurring/generate`, { method: 'POST', headers: this._getAuthHeaders() });
 
-            // Carrega todos os dados do backend em paralelo para mais performance
             const [transactions, budgets, recurring] = await Promise.all([
                 fetch(`${this.API_URL}/transactions`, { headers: this._getAuthHeaders() }).then(res => res.json()),
                 fetch(`${this.API_URL}/budgets`, { headers: this._getAuthHeaders() }).then(res => res.json()),
@@ -42,13 +38,12 @@ class Model {
 
         } catch (error) {
             console.error("Erro ao carregar dados iniciais:", error);
-            // Em caso de falha (token expirado, etc.), desloga o usuário
             sessionStorage.clear();
             window.location.href = 'login.html';
         }
     }
 
-    // --- MANIPULAÇÃO VIA API ---
+    // manip API
     async addTransaction(data) {
         const response = await fetch(`${this.API_URL}/transactions`, { method: 'POST', headers: this._getAuthHeaders(), body: JSON.stringify(data) });
         const newTransaction = await response.json();
@@ -93,7 +88,7 @@ class Model {
         this.recurringTransactions = this.recurringTransactions.filter(rt => rt.id !== id);
     }
 
-    // --- MÉTODOS DE GET E CÁLCULO (LOCAIS) ---
+    // GET e calculos
     getTransactions() { return this.transactions.sort((a, b) => new Date(b.date) - new Date(a.date)); }
     getBudgets() { return this.budgets; }
     getRecurringTransactions() { return this.recurringTransactions; }

@@ -9,12 +9,9 @@ const JWT_SECRET = process.env.JWT_SECRET || 'segredo-local-para-desenvolvimento
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middlewares
-// Em produção, troque '*' pela URL do seu frontend (ex: https://seu-site.vercel.app)
 app.use(cors({ origin: 'https://finandash-fullstack.vercel.app' })); 
 app.use(express.json());
 
-// Função para criar tabelas se não existirem
 const createTables = async () => {
     const query = `
         CREATE TABLE IF NOT EXISTS users (
@@ -59,7 +56,6 @@ const createTables = async () => {
     }
 };
 
-// --- Middleware de Autenticação ---
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
@@ -72,7 +68,7 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
-// --- ROTAS DE AUTENTICAÇÃO ---
+// rotas de auth
 app.post('/api/register', async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -111,7 +107,7 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// --- ROTAS DE TRANSAÇÕES ---
+// rotas de transacoes
 app.get('/api/transactions', authenticateToken, async (req, res) => {
     const result = await db.query("SELECT * FROM transactions WHERE userId = $1 ORDER BY date DESC, id DESC", [req.user.id]);
     res.json(result.rows);
@@ -141,7 +137,7 @@ app.delete('/api/transactions', authenticateToken, async (req, res) => {
     res.sendStatus(204);
 });
 
-// --- ROTAS DE ORÇAMENTOS ---
+// rotas de orçamentos
 app.get('/api/budgets', authenticateToken, async (req, res) => {
     const result = await db.query("SELECT category, amount FROM budgets WHERE userId = $1", [req.user.id]);
     const budgetsObject = result.rows.reduce((obj, item) => ({ ...obj, [item.category]: parseFloat(item.amount) }), {});
@@ -158,7 +154,7 @@ app.post('/api/budgets', authenticateToken, async (req, res) => {
     res.sendStatus(200);
 });
 
-// --- ROTAS DE TRANSAÇÕES RECORRENTES ---
+// rotas de recorrente
 app.get('/api/recurring', authenticateToken, async (req, res) => {
     const result = await db.query("SELECT * FROM recurring_transactions WHERE userId = $1", [req.user.id]);
     res.json(result.rows);
@@ -196,7 +192,7 @@ app.post('/api/recurring/generate', authenticateToken, async (req, res) => {
     res.status(200).json({ message: `${result.rows.length} transações recorrentes geradas.` });
 });
 
-// --- Inicia o servidor e cria as tabelas ---
+// inicia para debug
 app.listen(PORT, () => {
     console.log(`🚀 Servidor rodando na porta http://localhost:${PORT}`);
     createTables();

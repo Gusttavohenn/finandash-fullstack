@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
 :root {
-    /* Variáveis para o Tema Dark */
+    /* tema dark */
     --primary-color: #4A69BD;
     --primary-hover: #5a7edc;
     --bg-color: #121212;

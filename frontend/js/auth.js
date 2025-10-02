@@ -8,10 +8,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginError = document.getElementById('login-error');
     const signupError = document.getElementById('signup-error');
 
-    // URL final da sua API na Render
+    // URL final
     const API_URL = 'https://finandash-api-gustavo.onrender.com/api';
 
-    // Lógica para alternar entre os formulários
+    // alternar entre os formulários
     showSignup.addEventListener('click', (e) => {
         e.preventDefault();
         loginFormContainer.classList.add('hidden');
@@ -64,7 +64,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) {
                 throw new Error(data.message || 'Erro ao fazer login.');
             }
-            // Salva os dados do usuário e o token na sessão do navegador
             sessionStorage.setItem('loggedInUser', JSON.stringify(data.user));
             sessionStorage.setItem('authToken', data.token);
             // Redireciona para o dashboard principal

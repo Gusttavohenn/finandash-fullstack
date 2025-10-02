@@ -1,4 +1,3 @@
-// --- CONTROLLER ---
 console.log("Controller.js carregado.");
 
 class Controller {
@@ -16,7 +15,7 @@ class Controller {
 
         this.setupEventListeners();
         
-        // Carrega todos os dados da API
+        // Carrega os dados da API
         await this.model.loadInitialData();
         
         this.view.displayUserSettings(this.model.userSettings);
@@ -82,7 +81,7 @@ class Controller {
         this.view.bindRecurringForm(this.handleAddRecurring);
     }
 
-    // --- HANDLERS (muitos agora são async) ---
+    // HANDLERS
     handleFilterChange = () => { this.currentPage = 1; this.onDataChanged(); }
     handleDashboardChange = () => { this.onDataChanged(); }
     handlePrevPage = () => { if (this.currentPage > 1) { this.currentPage--; this.onDataChanged(); } }
@@ -106,7 +105,7 @@ class Controller {
         document.body.classList.toggle('dark-mode');
         localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
     }
-    handleSaveSettings = (newName) => { /* A lógica para salvar o nome ainda pode ser local/rápida, sem await */ alert('Nome salvo. Será atualizado na próxima vez que você logar.'); }
+    handleSaveSettings = (newName) => { alert('Nome salvo. Será atualizado na próxima vez que você logar.'); }
     handleClearAllData = async () => { await this.model.clearAllData(); this.onDataChanged(); }
     handleLogout = () => { sessionStorage.clear(); window.location.href = '/login'; }
     
@@ -117,7 +116,7 @@ class Controller {
     handleDeleteRecurring = async (id) => { await this.model.deleteRecurringTransaction(id); this.onDataChanged(); }
 }
 
-// --- PONTO DE ENTRADA DA APLICAÇÃO ---
+// ENTRADA DA APLICAÇÃO
 const applyInitialTheme = () => { if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode'); }
 applyInitialTheme();
 const app = new Controller(new Model(), new View());
