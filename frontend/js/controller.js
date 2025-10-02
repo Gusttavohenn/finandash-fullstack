@@ -103,6 +103,9 @@ class Controller {
     handleAddReminder = async (data) => { await this.model.addReminder(data); this.view.showToast('Lembrete adicionado!'); this.onDataChanged(); }
     handleUpdateReminder = async (id, isPaid) => { await this.model.updateReminder(id, isPaid); this.onDataChanged(); }
     handleDeleteReminder = async (id) => { await this.model.deleteReminder(id); this.view.showToast('Lembrete removido.'); this.onDataChanged(); }
+    handleCollapseSidebar = () => {
+        document.body.classList.toggle('sidebar-collapsed');
+    }
 }
 
 const applyInitialTheme = () => { if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode'); }

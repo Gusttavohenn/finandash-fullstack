@@ -38,20 +38,92 @@ body {
 
 /* --- BARRA LATERAL --- */
 .sidebar {
-    width: 260px;
+    width: var(--sidebar-width);
     background-color: var(--sidebar-bg);
     border-right: 1px solid var(--border-color);
     padding: 20px;
     display: flex;
     flex-direction: column;
-    transition: background-color 0.3s, border-color 0.3s;
+    position: fixed; /* 1. Fixa o menu na tela */
+    top: 0;
+    left: 0;
+    height: 100%;
+    z-index: 1000;
+    transition: width 0.3s ease-in-out; /* 2. Anima a mudança de largura */
 }
-.sidebar-header .logo { display: flex; align-items: center; color: var(--primary-color); font-size: 1.5rem; font-weight: 700; text-decoration: none; margin-bottom: 40px; }
-.sidebar-header .logo i { margin-right: 10px; }
-.sidebar-menu .menu-item { display: flex; align-items: center; padding: 12px 15px; margin-bottom: 10px; border-radius: 8px; color: var(--text-muted); text-decoration: none; font-weight: 500; transition: background-color 0.2s, color 0.2s; }
-.sidebar-menu .menu-item:hover, .sidebar-menu .menu-item.active { background-color: var(--primary-color); color: #fff; }
-.sidebar-menu .menu-item i { margin-right: 15px; width: 20px; text-align: center; }
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Alinha o logo e o botão */
+    margin-bottom: 40px;
+}
+
+.sidebar-header .logo {
+    display: flex;
+    align-items: center;
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap; /* Impede que o texto quebre */
+    overflow: hidden; /* Esconde o texto quando o menu encolhe */
+}
+
+.sidebar-header .logo i {
+    margin-right: 10px;
+    min-width: 48px; /* Garante alinhamento quando colapsado */
+    text-align: center;
+}
+
+.collapse-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    transition: transform 0.3s ease-in-out;
+}
+
+.sidebar-menu .menu-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+}
+.sidebar-menu .menu-item:hover, .sidebar-menu .menu-item.active {
+    background-color: var(--primary-color);
+    color: #fff;
+}
+.sidebar-menu .menu-item i {
+    margin-right: 15px;
+    min-width: 48px;
+    text-align: center;
+    font-size: 1.1rem;
+}
 .sidebar-menu .logout { margin-top: auto; }
+
+/* --- ESTADO COLAPSADO --- */
+body.sidebar-collapsed .sidebar {
+    width: var(--sidebar-width-collapsed);
+}
+
+body.sidebar-collapsed .sidebar-header .logo span,
+body.sidebar-collapsed .sidebar-menu .menu-item span {
+    opacity: 0;
+    width: 0;
+}
+
+body.sidebar-collapsed .collapse-btn {
+    transform: rotate(180deg);
+}
+
 
 /* --- CONTEÚDO PRINCIPAL --- */
 .main-content { flex: 1; padding: 30px; overflow-y: auto; }

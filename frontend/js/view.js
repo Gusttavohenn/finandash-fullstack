@@ -11,6 +11,7 @@ class View {
         this.monthlySummaryChartContext = document.getElementById('monthlySummaryChart').getContext('2d');
         this.monthlySummaryChart = null;
         this.themeToggleButton = document.getElementById('theme-toggle');
+        this.collapseSidebarBtn = document.getElementById('collapse-sidebar-btn');
         this.userNameHeaderEl = document.querySelector('.user-profile span');
         this.pages = document.querySelectorAll('.page-content');
         this.menuItems = document.querySelectorAll('.sidebar-menu .menu-item');
@@ -154,4 +155,9 @@ class View {
     bindBudgetForm(h) { this.budgetForm.addEventListener('submit', e => { e.preventDefault(); const c = this.budgetForm['budget-category'].value; const a = parseFloat(this.budgetForm['budget-amount'].value); if (c && a >= 0) { h(c, a); this.budgetForm.reset(); } }); }
     bindRecurringForm(h) { this.recurringForm.addEventListener('submit', e => { e.preventDefault(); const d = { description: this.recurringForm['recurring-description'].value, amount: parseFloat(this.recurringForm['recurring-amount'].value), dayOfMonth: parseInt(this.recurringForm['recurring-day'].value), category: this.recurringForm['recurring-category'].value, type: this.recurringForm['recurring-type'].value }; if (d.description && d.amount > 0 && d.dayOfMonth) { h(d); this.recurringForm.reset(); } }); }
     bindReminderForm(h) { this.reminderForm.addEventListener('submit', e => { e.preventDefault(); const d = { description: this.reminderForm['reminder-description'].value, amount: this.reminderForm['reminder-amount'].value ? parseFloat(this.reminderForm['reminder-amount'].value) : null, dueDate: this.reminderForm['reminder-dueDate'].value }; if (d.description && d.dueDate) { h(d); this.reminderForm.reset(); } }); }
+    bindCollapseSidebar(handler) {
+        if (this.collapseSidebarBtn) {
+            this.collapseSidebarBtn.addEventListener('click', handler);
+        }
+    }
 }
