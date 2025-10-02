@@ -1,4 +1,3 @@
-// --- CONTROLLER ---
 console.log("Controller.js carregado.");
 
 class Controller {
@@ -117,9 +116,7 @@ class Controller {
     }
 
     handleSaveSettings = (newName) => {
-        // A lógica para salvar o nome do usuário pode ser adaptada para o backend se desejado,
-        // mas por enquanto, a lógica local é suficiente.
-        this.model.updateUserName(newName); // Supondo que este método atualize o model localmente
+        this.model.updateUserName(newName); 
         this.onDataChanged();
         this.view.showToast('Perfil salvo com sucesso!');
     }
@@ -131,9 +128,11 @@ class Controller {
     }
 
     handleLogout = () => {
-        sessionStorage.clear();
-        window.location.href = '/login';
-    }
+    // Remove apenas os itens específicos da sessão, em vez de limpar tudo
+    sessionStorage.removeItem('loggedInUser');
+    sessionStorage.removeItem('authToken');
+    window.location.href = '/login';
+}
     
     handleUpdateBudget = async (category, amount) => {
         await this.model.updateBudget(category, amount);
@@ -160,7 +159,6 @@ class Controller {
     }
 }
 
-// --- PONTO DE ENTRADA DA APLICAÇÃO ---
 const applyInitialTheme = () => { if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode'); }
 applyInitialTheme();
 const app = new Controller(new Model(), new View());

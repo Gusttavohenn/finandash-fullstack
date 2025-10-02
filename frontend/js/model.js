@@ -20,28 +20,36 @@ class Model {
     }
 
     async loadInitialData() {
-        try {
-            await fetch(`${this.API_URL}/recurring/generate`, { method: 'POST', headers: this._getAuthHeaders() });
+    try {
+        await fetch(`${this.API_URL}/recurring/generate`, { method: 'POST', headers: this._getAuthHeaders() });
 
-            const [transactions, budgets, recurring] = await Promise.all([
-                fetch(`${this.API_URL}/transactions`, { headers: this._getAuthHeaders() }).then(res => res.json()),
-                fetch(`${this.API_URL}/budgets`, { headers: this._getAuthHeaders() }).then(res => res.json()),
-                fetch(`${this.API_URL}/recurring`, { headers: this._getAuthHeaders() }).then(res => res.json())
-            ]);
-            
-            this.transactions = transactions;
-            this.budgets = budgets;
-            this.recurringTransactions = recurring;
+        const responses = await Promise.all([
+            fetch(`${this.API_URL}/transactions`, { headers: this._getAuthHeaders() }),
+            fetch(`${this.API_URL}/budgets`, { headers: this._getAuthHeaders() }),
+            fetch(`${this.API_URL}/recurring`, { headers: this._getAuthHeaders() })
+        ]);
 
-            const loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
-            this.userSettings.name = loggedInUser.name;
-
-        } catch (error) {
-            console.error("Erro ao carregar dados iniciais:", error);
-            sessionStorage.clear();
-            window.location.href = 'login.html';
+        for (const res of responses) {
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(`Falha na API: ${errorData.message || res.statusText}`);
+            }
         }
+        
+        const [transactions, budgets, recurring] = await Promise.all(responses.map(res => res.json()));
+        
+        this.transactions = transactions;
+        this.budgets = budgets;
+        this.recurringTransactions = recurring;
+
+        const loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
+        this.userSettings.name = loggedInUser.name;
+
+    } catch (error) {
+        console.error("ERRO CRÍTICO ao carregar dados iniciais:", error);
+        alert("Houve um erro ao carregar seus dados. O servidor pode estar indisponível. Verifique o console (F12) e tente atualizar a página em alguns segundos.");
     }
+}
 
     // manip API
     async addTransaction(data) {
