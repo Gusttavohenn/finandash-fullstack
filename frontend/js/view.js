@@ -2,18 +2,27 @@ console.log("View.js carregado.");
 
 class View {
     constructor() {
+        // Cards de Métricas
         this.totalRevenueEl = document.getElementById('total-revenue');
         this.totalExpensesEl = document.getElementById('total-expenses');
         this.balanceEl = document.getElementById('balance');
+        // Tabela de Transações (Dashboard)
         this.transactionsTableBody = document.querySelector('#transactions-table tbody');
+        // Gráficos
         this.chartContext = document.getElementById('expensesChart').getContext('2d');
         this.expensesChart = null;
+        this.monthlySummaryChartContext = document.getElementById('monthlySummaryChart').getContext('2d');
+        this.monthlySummaryChart = null;
+        // Cabeçalho e Tema
         this.themeToggleButton = document.getElementById('theme-toggle');
         this.userNameHeaderEl = document.querySelector('.user-profile span');
+        // Páginas e Menu
         this.pages = document.querySelectorAll('.page-content');
         this.menuItems = document.querySelectorAll('.sidebar-menu .menu-item');
+        // Página de Transações
         this.fullTransactionsTableBody = document.querySelector('#full-transactions-table tbody');
         this.addTransactionBtn = document.getElementById('add-transaction-btn');
+        // Modal e Formulário de Transação
         this.modal = document.getElementById('transaction-modal');
         this.modalTitle = document.getElementById('modal-title');
         this.transactionForm = document.getElementById('transaction-form');
@@ -21,29 +30,37 @@ class View {
         this.transactionTypeSelect = document.getElementById('type');
         this.paymentMethodGroup = document.getElementById('payment-method-group');
         this.paymentMethodSelect = document.getElementById('payment-method');
+        // Elementos da página de Configurações
         this.userNameInputEl = document.getElementById('user-name');
         this.profileFormEl = document.getElementById('profile-form');
         this.clearDataBtnEl = document.getElementById('clear-data-btn');
         this.logoutBtn = document.querySelector('.sidebar-menu .logout');
+        this.logoutBtnPage = document.getElementById('logout-btn-page');
+        // Modal de Confirmação
         this.confirmationModal = document.getElementById('confirmation-modal');
         this.confirmationMessage = document.getElementById('confirmation-message');
         this.cancelConfirmationBtn = document.getElementById('cancel-confirmation-btn');
         this.confirmActionBtn = document.getElementById('confirm-action-btn');
+        // Filtros da pág. Transações
         this.searchInput = document.getElementById('search-input');
         this.typeFilter = document.getElementById('type-filter');
         this.monthFilter = document.getElementById('month-filter');
+        // Filtro de data do Dashboard
         this.dashboardDateFilter = document.getElementById('dashboard-date-filter');
+        // Controles de Paginação
         this.paginationControls = document.getElementById('pagination-controls');
         this.prevPageBtn = document.getElementById('prev-page-btn');
         this.nextPageBtn = document.getElementById('next-page-btn');
         this.pageInfo = document.getElementById('page-info');
+        // Seletores de Orçamento
         this.budgetForm = document.getElementById('budget-form');
         this.budgetsList = document.getElementById('budgets-list');
         this.dashboardBudgetsContainer = document.getElementById('dashboard-budgets-container');
-        this.monthlySummaryChartContext = document.getElementById('monthlySummaryChart').getContext('2d');
-        this.monthlySummaryChart = null;
+        // Seletores de Recorrentes
         this.recurringForm = document.getElementById('recurring-form');
         this.recurringList = document.getElementById('recurring-list');
+        // Container de Notificações (Toasts)
+        this.toastContainer = document.getElementById('toast-container');
     }
 
     _formatCurrency(value) { return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
@@ -221,6 +238,14 @@ class View {
         this.confirmActionBtn.onclick = () => { onConfirm(); this.hideConfirmationModal(); };
     }
 
+    showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        this.toastContainer.appendChild(toast);
+        setTimeout(() => { toast.remove(); }, 4000);
+    }
+
     getFilterValues() { return { searchTerm: this.searchInput.value, type: this.typeFilter.value, month: this.monthFilter.value }; }
     getDashboardDateRange() { return this.dashboardDateFilter.value; }
 
@@ -246,7 +271,10 @@ class View {
     }
     bindSaveSettings(h) { this.profileFormEl.addEventListener('submit', e => { e.preventDefault(); const n = this.userNameInputEl.value; if (n) h(n); }); }
     bindClearAllData(h) { this.clearDataBtnEl.addEventListener('click', () => this.showConfirmationModal('Você tem certeza que deseja apagar TODAS as suas transações? Esta ação não pode ser desfeita.', h)); }
-    bindLogout(h) { this.logoutBtn.addEventListener('click', e => { e.preventDefault(); h(); }); }
+    bindLogout(h) {
+        this.logoutBtn.addEventListener('click', e => { e.preventDefault(); h(); });
+        this.logoutBtnPage.addEventListener('click', e => { e.preventDefault(); h(); });
+    }
     bindTransactionTypeChange() { this.transactionTypeSelect.addEventListener('change', () => { this.paymentMethodGroup.style.display = (this.transactionTypeSelect.value === 'expense') ? 'block' : 'none'; }); }
     bindEditAndDeleteTransaction(editH, deleteH) {
         this.fullTransactionsTableBody.addEventListener('click', e => {

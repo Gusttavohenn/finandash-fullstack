@@ -1,3 +1,4 @@
+// --- CONTROLLER ---
 console.log("Controller.js carregado.");
 
 class Controller {
@@ -14,8 +15,8 @@ class Controller {
         if (!loggedInUser) return;
 
         this.setupEventListeners();
+        this.model.setCurrentUser(loggedInUser.email);
         
-        // Carrega os dados da API
         await this.model.loadInitialData();
         
         this.view.displayUserSettings(this.model.userSettings);
@@ -81,7 +82,7 @@ class Controller {
         this.view.bindRecurringForm(this.handleAddRecurring);
     }
 
-    // HANDLERS
+    // --- HANDLERS ---
     handleFilterChange = () => { this.currentPage = 1; this.onDataChanged(); }
     handleDashboardChange = () => { this.onDataChanged(); }
     handlePrevPage = () => { if (this.currentPage > 1) { this.currentPage--; this.onDataChanged(); } }
@@ -94,29 +95,72 @@ class Controller {
     handleMenuNavigation = (pageId) => { this.view.showPage(pageId); }
     
     handleSubmitTransaction = async (data) => {
-        if (data.id) await this.model.editTransaction(data.id, data);
-        else await this.model.addTransaction(data);
+        if (data.id) {
+            await this.model.editTransaction(data.id, data);
+            this.view.showToast('Transação atualizada com sucesso!');
+        } else {
+            await this.model.addTransaction(data);
+            this.view.showToast('Transação adicionada com sucesso!');
+        }
         this.onDataChanged();
     }
     handleEditTransaction = (id) => { const t = this.model.getTransactionById(id); if (t) this.view.toggleModal(true, t); }
-    handleDeleteTransaction = async (id) => { await this.model.deleteTransaction(id); this.onDataChanged(); }
+    handleDeleteTransaction = async (id) => {
+        await this.model.deleteTransaction(id);
+        this.view.showToast('Transação excluída.', 'success');
+        this.onDataChanged();
+    }
     
     handleThemeToggle = () => {
         document.body.classList.toggle('dark-mode');
         localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
     }
-    handleSaveSettings = (newName) => { alert('Nome salvo. Será atualizado na próxima vez que você logar.'); }
-    handleClearAllData = async () => { await this.model.clearAllData(); this.onDataChanged(); }
-    handleLogout = () => { sessionStorage.clear(); window.location.href = '/login'; }
+
+    handleSaveSettings = (newName) => {
+        // A lógica para salvar o nome do usuário pode ser adaptada para o backend se desejado,
+        // mas por enquanto, a lógica local é suficiente.
+        this.model.updateUserName(newName); // Supondo que este método atualize o model localmente
+        this.onDataChanged();
+        this.view.showToast('Perfil salvo com sucesso!');
+    }
+
+    handleClearAllData = async () => {
+        await this.model.clearAllData();
+        this.view.showToast('Todos os dados de transações foram apagados.', 'success');
+        this.onDataChanged();
+    }
+
+    handleLogout = () => {
+        sessionStorage.clear();
+        window.location.href = '/login';
+    }
     
-    handleUpdateBudget = async (category, amount) => { await this.model.updateBudget(category, amount); this.onDataChanged(); }
-    handleDeleteBudget = async (category) => { await this.model.deleteBudget(category); this.onDataChanged(); }
+    handleUpdateBudget = async (category, amount) => {
+        await this.model.updateBudget(category, amount);
+        this.view.showToast('Orçamento salvo com sucesso!');
+        this.onDataChanged();
+    }
+
+    handleDeleteBudget = async (category) => {
+        await this.model.deleteBudget(category);
+        this.view.showToast('Orçamento removido.', 'success');
+        this.onDataChanged();
+    }
     
-    handleAddRecurring = async (data) => { await this.model.addRecurringTransaction(data); this.onDataChanged(); }
-    handleDeleteRecurring = async (id) => { await this.model.deleteRecurringTransaction(id); this.onDataChanged(); }
+    handleAddRecurring = async (data) => {
+        await this.model.addRecurringTransaction(data);
+        this.view.showToast('Transação recorrente salva!');
+        this.onDataChanged();
+    }
+
+    handleDeleteRecurring = async (id) => {
+        await this.model.deleteRecurringTransaction(id);
+        this.view.showToast('Transação recorrente removida.', 'success');
+        this.onDataChanged();
+    }
 }
 
-// ENTRADA DA APLICAÇÃO
+// --- PONTO DE ENTRADA DA APLICAÇÃO ---
 const applyInitialTheme = () => { if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode'); }
 applyInitialTheme();
 const app = new Controller(new Model(), new View());
