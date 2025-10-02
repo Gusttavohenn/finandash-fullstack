@@ -1,10 +1,8 @@
-const loggedInUser = sessionStorage.getItem('loggedInUser');
-const isLoginPage = window.location.pathname === '/' || window.location.pathname.startsWith('/login');
+// frontend/js/protect.js
 
-if (!loggedInUser && !isLoginPage) {
-    // Se não está logado E não está na página de login, redireciona para o login
-    window.location.href = '/';
-} else if (loggedInUser && isLoginPage) {
-    // Se está logado E está tentando acessar a página de login, redireciona para o dashboard
-    window.location.href = '/dashboard';
+const loggedInUser = sessionStorage.getItem('loggedInUser');
+
+if (!loggedInUser) {
+    // Se não há usuário logado, simplesmente redireciona para a página de login.
+    window.location.href = '/login';
 }
