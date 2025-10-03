@@ -18,7 +18,7 @@
                 <a href="#" class="menu-item active" data-page="dashboard"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
                 <a href="#" class="menu-item" data-page="transactions"><i class="fas fa-exchange-alt"></i><span>Transações</span></a>
                 <a href="#" class="menu-item" data-page="reminders"><i class="fas fa-bell"></i><span>Lembretes</span></a>
-                <a href="#" class="menu-item" data-page="budgets"><i class="fas fa-bullseye"></i><span>Orçamentos</span></a>
+                <a href="#" class="menu-item" data-page="budgets"><i class="fas fa-bullseye"></i><span>Metas</span></a>
                 <a href="#" class="menu-item" data-page="recurring"><i class="fas fa-sync-alt"></i><span>Recorrentes</span></a>
                 <a href="#" class="menu-item" data-page="settings"><i class="fas fa-cog"></i><span>Configurações</span></a>
                 <a href="#" class="menu-item logout"><i class="fas fa-sign-out-alt"></i><span>Sair</span></a>
@@ -45,16 +45,16 @@
                     </div>
                 </header>
                 <section class="metrics-cards">
-                    <div class="card"><i class="fas fa-dollar-sign card-icon income"></i><div class="card-info"><h4>Receita Total</h4><p id="total-revenue">R$ 0,00</p></div></div>
-                    <div class="card"><i class="fas fa-shopping-cart card-icon expense"></i><div class="card-info"><h4>Despesas Totais</h4><p id="total-expenses">R$ 0,00</p></div></div>
-                    <div class="card"><i class="fas fa-balance-scale card-icon balance"></i><div class="card-info"><h4>Balanço</h4><p id="balance">R$ 0,00</p></div></div>
+                    <div class="card"><i class="fa-solid fa-arrow-trend-up card-icon income"></i><div class="card-info"><h4>Entrada Total</h4><p id="total-revenue">R$ 0,00</p></div></div>
+                    <div class="card"><i class="fa-solid fa-arrow-trend-down card-icon expense"></i><div class="card-info"><h4>Saída Total</h4><p id="total-expenses">R$ 0,00</p></div></div>
+                    <div class="card"><i class="fa-solid fa-scale-balanced card-icon balance"></i><div class="card-info"><h4>Balanço</h4><p id="balance">R$ 0,00</p></div></div>
                 </section>
                 <section id="reminders-overview" class="data-section-single-col">
                     <h3>Lembretes Próximos</h3>
                     <div id="dashboard-reminders-container"></div>
                 </section>
                 <section id="budgets-overview" class="data-section-single-col">
-                    <h3>Progresso dos Orçamentos (Este Mês)</h3>
+                    <h3>Progresso das Metas (Este Mês)</h3>
                     <div id="dashboard-budgets-container"></div>
                 </section>
                 <section class="data-section">
@@ -109,16 +109,16 @@
             </section>
 
             <section id="budgets-page" class="page-content page-hidden">
-                <header class="main-header"><h2>Meus Orçamentos Mensais</h2></header>
+                <header class="main-header"><h2>Minhas Metas Mensais</h2></header>
                 <div class="settings-card">
                     <h3>Definir Limites por Categoria</h3>
                     <form id="budget-form">
                         <div class="form-group"><label for="budget-category">Categoria</label><input type="text" id="budget-category" placeholder="Ex: Alimentação" required></div>
-                        <div class="form-group"><label for="budget-amount">Valor do Orçamento (R$)</label><input type="number" id="budget-amount" placeholder="Ex: 500" required step="0.01" min="0"></div>
-                        <button type="submit" class="btn-primary">Salvar Orçamento</button>
+                        <div class="form-group"><label for="budget-amount">Valor da Meta (R$)</label><input type="number" id="budget-amount" placeholder="Ex: 500" required step="0.01" min="0"></div>
+                        <button type="submit" class="btn-primary">Salvar Meta</button>
                     </form>
                 </div>
-                <div class="full-transactions-list"><h3>Orçamentos Salvos</h3><div id="budgets-list"></div></div>
+                <div class="full-transactions-list"><h3>Metas Salvas</h3><div id="budgets-list"></div></div>
             </section>
             
             <section id="recurring-page" class="page-content page-hidden">

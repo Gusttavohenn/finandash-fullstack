@@ -69,7 +69,7 @@ body {
     padding: 25px;
     border-radius: 12px;
     box-shadow: var(--shadow);
-    margin-bottom: 30px; /* GARANTE O ESPAÇAMENTO EM TODAS AS PÁGINAS */
+    margin-bottom: 30px;
 }
 .card:hover { transform: translateY(-5px); }
 .card-icon { font-size: 2rem; padding: 15px; border-radius: 50%; margin-right: 20px; color: #fff; }
@@ -137,7 +137,7 @@ body {
 #pagination-controls button { padding: 8px 16px; }
 #pagination-controls button:disabled { cursor: not-allowed; opacity: 0.5; }
 
-/* --- ORÇAMENTOS, LEMBRETES & RECORRENTES --- */
+/* --- ORÇAMENTOS, LEMBRETES e RECORRENTES --- */
 #dashboard-budgets-container, #budgets-list, #recurring-list, #reminders-list { display: grid; gap: 15px; }
 .budget-item, .recurring-item, .reminder-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border: 1px solid var(--border-color); border-radius: 8px; transition: opacity 0.3s ease; }
 .budget-item-info, .recurring-item-info, .reminder-item-info { flex-grow: 1; }
