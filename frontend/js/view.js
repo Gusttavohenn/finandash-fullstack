@@ -105,16 +105,16 @@ class View {
             options: { 
                 responsive: true, 
                 maintainAspectRatio: true,
-                aspectRatio: 1.2,
+                aspectRatio: 1.5,
                 layout: {
-                    padding: 10
+                    padding: 15
                 },
                 plugins: { 
                     legend: { 
                         position: 'top',
                         labels: {
                             boxWidth: 12,
-                            padding: 8,
+                            padding: 10,
                             font: {
                                 size: 11
                             }
