@@ -82,12 +82,20 @@ body {
 .chart-container {
     position: relative;
     height: 40vh;
+    max-height: 400px;
     background-color: var(--card-bg);
     padding: 25px;
     border-radius: 12px;
     box-shadow: var(--shadow);
+    overflow: hidden;
 }
-.chart-container h3 { margin-bottom: 20px; }
+.chart-container h3 { 
+    margin-bottom: 20px; 
+}
+.chart-container canvas {
+    max-width: 100% !important;
+    max-height: calc(40vh - 65px) !important;
+}
 
 /* --- TABELAS --- */
 #transactions-table, #full-transactions-table { width: 100%; border-collapse: collapse; }
