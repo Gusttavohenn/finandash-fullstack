@@ -84,11 +84,47 @@ class View {
     }
 
     renderChart(expensesByCategory) {
-        const labels = Object.keys(expensesByCategory); const data = Object.values(expensesByCategory);
-        if (this.expensesChart) { this.expensesChart.data.labels = labels; this.expensesChart.data.datasets[0].data = data; this.expensesChart.update(); } else {
-            this.expensesChart = new Chart(this.chartContext, { type: 'doughnut', data: { labels, datasets: [{ label: 'Despesas por Categoria', data, backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'], hoverOffset: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } } });
-        }
+    const labels = Object.keys(expensesByCategory); 
+    const data = Object.values(expensesByCategory);
+    if (this.expensesChart) { 
+        this.expensesChart.data.labels = labels; 
+        this.expensesChart.data.datasets[0].data = data; 
+        this.expensesChart.update(); 
+    } else {
+        this.expensesChart = new Chart(this.chartContext, { 
+            type: 'doughnut', 
+            data: { 
+                labels, 
+                datasets: [{ 
+                    label: 'Despesas por Categoria', 
+                    data, 
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'], 
+                    hoverOffset: 4 
+                }] 
+            }, 
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: true,
+                aspectRatio: 1.2,
+                layout: {
+                    padding: 10
+                },
+                plugins: { 
+                    legend: { 
+                        position: 'top',
+                        labels: {
+                            boxWidth: 12,
+                            padding: 8,
+                            font: {
+                                size: 11
+                            }
+                        }
+                    } 
+                } 
+            } 
+        });
     }
+}
     
     renderMonthlySummaryChart(summaryData) {
         const datasets = [{ label: 'Receitas', data: summaryData.incomeData, backgroundColor: 'rgba(40, 167, 69, 0.7)', borderColor: 'rgba(40, 167, 69, 1)', borderWidth: 1 }, { label: 'Despesas', data: summaryData.expenseData, backgroundColor: 'rgba(220, 53, 69, 0.7)', borderColor: 'rgba(220, 53, 69, 1)', borderWidth: 1 }];
