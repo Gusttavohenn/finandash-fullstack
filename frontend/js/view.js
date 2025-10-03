@@ -105,7 +105,7 @@ class View {
             options: { 
                 responsive: true, 
                 maintainAspectRatio: true,
-                aspectRatio: 1.5,
+                aspectRatio: 2.0,
                 layout: {
                     padding: 15
                 },
