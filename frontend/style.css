@@ -182,3 +182,28 @@ body {
     .full-transactions-list, .data-section-single-col { overflow-x: auto; }
     #full-transactions-table, #transactions-table { white-space: nowrap; min-width: 600px; }
 }
+/* --- LOADING OVERLAY --- */
+#loading-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: var(--bg-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    z-index: 9999;
+    transition: opacity 0.3s;
+}
+#loading-overlay.hidden { display: none; }
+#loading-overlay p { color: var(--text-muted); font-size: 0.95rem; }
+#loading-overlay .loading-hint { font-size: 0.78rem; }
+.loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 5px solid var(--border-color);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

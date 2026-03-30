@@ -1,4 +1,4 @@
-const loggedInUser = sessionStorage.getItem('loggedInUser');
+const loggedInUser = localStorage.getItem('loggedInUser');
 
 if (!loggedInUser) {
     window.location.href = '/login';

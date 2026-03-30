@@ -3,9 +3,22 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
 const db = require('./db.js');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'segredo-local-para-dev';
+if (!process.env.JWT_SECRET) {
+    console.error('ERRO FATAL: A variável de ambiente JWT_SECRET não está definida.');
+    process.exit(1);
+}
+const JWT_SECRET = process.env.JWT_SECRET;
+
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 20,
+    message: { message: 'Muitas tentativas. Tente novamente em 15 minutos.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -31,10 +44,11 @@ const authenticateToken = (req, res, next) => {
 };
 
 // --- ROTAS DE AUTENTICAÇÃO ---
-app.post('/api/register', async (req, res) => {
+app.post('/api/register', authLimiter, async (req, res) => {
     try {
         const { name, email, password } = req.body;
         if (!name || !email || !password) return res.status(400).json({ message: 'Todos os campos são obrigatórios.' });
+        if (password.length < 6) return res.status(400).json({ message: 'A senha deve ter no mínimo 6 caracteres.' });
         const existingUser = await db.query("SELECT * FROM users WHERE email = $1", [email]);
         if (existingUser.rows.length > 0) return res.status(400).json({ message: 'Este email já está em uso.' });
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -42,7 +56,7 @@ app.post('/api/register', async (req, res) => {
         res.status(201).json(newUser.rows[0]);
     } catch (error) { console.error(error); res.status(500).json({ message: 'Erro interno no servidor.' }); }
 });
-app.post('/api/login', async (req, res) => {
+app.post('/api/login', authLimiter, async (req, res) => {
     try {
         const { email, password } = req.body;
         if (!email || !password) return res.status(400).json({ message: 'Email e senha são obrigatórios.' });

@@ -2,7 +2,7 @@ console.log("Model.js carregado.");
 
 class Model {
     constructor() {
-        this.API_URL = 'https://finandash-api-gustavo.onrender.com/api';
+        this.API_URL = API_URL; // definido em config.js
         this.transactions = [];
         this.userSettings = { name: 'Usuário' };
         this.budgets = {};
@@ -12,7 +12,7 @@ class Model {
 
     // auth
     _getAuthHeaders() {
-        const token = sessionStorage.getItem('authToken');
+        const token = localStorage.getItem('authToken');
         return {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
@@ -35,12 +35,12 @@ class Model {
             this.recurringTransactions = recurring;
             this.reminders = reminders;
 
-            const loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
+            const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
             this.userSettings.name = loggedInUser.name;
 
         } catch (error) {
             console.error("Erro ao carregar dados iniciais:", error);
-            alert("Houve um erro ao carregar seus dados. O servidor pode estar indisponível. Tente atualizar a página.");
+            throw error;
         }
     }
 

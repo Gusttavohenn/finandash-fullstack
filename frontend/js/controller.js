@@ -10,10 +10,18 @@ class Controller {
     }
 
     async init() {
-        const loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
+        const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
         if (!loggedInUser) return;
         this.setupEventListeners();
-        await this.model.loadInitialData();
+        this.view.showLoading();
+        try {
+            await this.model.loadInitialData();
+        } catch {
+            this.view.hideLoading();
+            this.view.showToast('Erro ao conectar com o servidor. Tente recarregar a página.', 'error');
+            return;
+        }
+        this.view.hideLoading();
         this.view.displayUserSettings(this.model.userSettings);
         this.onDataChanged();
         this.view.showPage('dashboard');
@@ -76,6 +84,7 @@ class Controller {
         this.view.bindBudgetForm(this.handleUpdateBudget);
         this.view.bindRecurringForm(this.handleAddRecurring);
         this.view.bindReminderForm(this.handleAddReminder);
+        this.view.bindExportCSV(this.handleExportCSV);
     }
 
     // handle
@@ -95,7 +104,7 @@ class Controller {
     handleThemeToggle = () => { document.body.classList.toggle('dark-mode'); localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light'); }
     handleSaveSettings = (newName) => { /* A lógica de salvar nome do usuário ainda é local */ this.view.showToast('Perfil salvo!'); }
     handleClearAllData = async () => { await this.model.clearAllData(); this.view.showToast('Todas as transações foram apagadas.'); this.onDataChanged(); }
-    handleLogout = () => { sessionStorage.clear(); window.location.href = '/login'; }
+    handleLogout = () => { localStorage.removeItem('loggedInUser'); localStorage.removeItem('authToken'); window.location.href = '/login'; }
     handleUpdateBudget = async (category, amount) => { await this.model.updateBudget(category, amount); this.view.showToast('Orçamento salvo!'); this.onDataChanged(); }
     handleDeleteBudget = async (category) => { await this.model.deleteBudget(category); this.view.showToast('Orçamento removido.'); this.onDataChanged(); }
     handleAddRecurring = async (data) => { await this.model.addRecurringTransaction(data); this.view.showToast('Recorrência salva!'); this.onDataChanged(); }
@@ -103,6 +112,7 @@ class Controller {
     handleAddReminder = async (data) => { await this.model.addReminder(data); this.view.showToast('Lembrete adicionado!'); this.onDataChanged(); }
     handleUpdateReminder = async (id, isPaid) => { await this.model.updateReminder(id, isPaid); this.onDataChanged(); }
     handleDeleteReminder = async (id) => { await this.model.deleteReminder(id); this.view.showToast('Lembrete removido.'); this.onDataChanged(); }
+    handleExportCSV = () => { const transactions = this.model.getTransactions(); if (transactions.length === 0) { this.view.showToast('Nenhuma transação para exportar.', 'error'); return; } this.view.exportToCSV(transactions); this.view.showToast('CSV exportado com sucesso!'); }
 }
 
 const applyInitialTheme = () => { if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode'); }

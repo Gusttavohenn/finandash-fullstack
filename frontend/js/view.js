@@ -49,6 +49,7 @@ class View {
         this.remindersList = document.getElementById('reminders-list');
         this.reminderForm = document.getElementById('reminder-form');
         this.dashboardRemindersContainer = document.getElementById('dashboard-reminders-container');
+        this.exportCsvBtn = document.getElementById('export-csv-btn');
     }
 
     _formatCurrency(value) { return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
@@ -206,6 +207,28 @@ class View {
     hideConfirmationModal() { this.confirmationModal.classList.add('page-hidden'); }
     showConfirmationModal(message, onConfirm) { this.confirmationMessage.textContent = message; this.confirmationModal.classList.remove('page-hidden'); this.confirmActionBtn.onclick = () => { onConfirm(); this.hideConfirmationModal(); }; }
     showToast(message, type = 'success') { const t = document.createElement('div'); t.className = `toast ${type}`; t.textContent = message; this.toastContainer.appendChild(t); setTimeout(() => { t.remove(); }, 4000); }
+    showLoading() { const o = document.getElementById('loading-overlay'); if (o) o.classList.remove('hidden'); }
+    hideLoading() { const o = document.getElementById('loading-overlay'); if (o) o.classList.add('hidden'); }
+    bindExportCSV(h) { if (this.exportCsvBtn) this.exportCsvBtn.addEventListener('click', h); }
+    exportToCSV(transactions) {
+        const header = ['Descrição', 'Data', 'Valor', 'Tipo', 'Categoria', 'Método de Pagamento'];
+        const rows = transactions.map(t => [
+            `"${t.description.replace(/"/g, '""')}"`,
+            new Date(t.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' }),
+            parseFloat(t.amount).toFixed(2).replace('.', ','),
+            t.type === 'income' ? 'Receita' : 'Despesa',
+            t.category,
+            t.paymentmethod || ''
+        ]);
+        const csv = [header.join(';'), ...rows.map(r => r.join(';'))].join('\n');
+        const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `transacoes_${new Date().toISOString().slice(0,10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
     getFilterValues() { return { searchTerm: this.searchInput.value, type: this.typeFilter.value, month: this.monthFilter.value }; }
     getDashboardDateRange() { return this.dashboardDateFilter.value; }
     bindThemeToggler(h) { this.themeToggleButton.addEventListener('click', h); }

@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginError = document.getElementById('login-error');
     const signupError = document.getElementById('signup-error');
 
-    const API_URL = 'https://finandash-api-gustavo.onrender.com/api';
+    // API_URL definido em config.js
 
     /**
      * @param {string} message 
@@ -48,7 +48,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const name = document.getElementById('signup-name').value;
         const email = document.getElementById('signup-email').value;
         const password = document.getElementById('signup-password').value;
+        const btn = signupForm.querySelector('button[type="submit"]');
 
+        if (password.length < 6) {
+            signupError.textContent = 'A senha deve ter no mínimo 6 caracteres.';
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Criando conta...';
         try {
             const response = await fetch(`${API_URL}/register`, {
                 method: 'POST',
@@ -65,6 +73,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             signupError.textContent = error.message;
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Criar Conta';
         }
     });
 
@@ -73,6 +84,9 @@ document.addEventListener('DOMContentLoaded', () => {
         loginError.textContent = '';
         const email = document.getElementById('login-email').value;
         const password = document.getElementById('login-password').value;
+        const btn = loginForm.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.textContent = 'Entrando...';
         try {
             const response = await fetch(`${API_URL}/login`, {
                 method: 'POST',
@@ -83,11 +97,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) {
                 throw new Error(data.message || 'Erro ao fazer login.');
             }
-            sessionStorage.setItem('loggedInUser', JSON.stringify(data.user));
-            sessionStorage.setItem('authToken', data.token);
+            localStorage.setItem('loggedInUser', JSON.stringify(data.user));
+            localStorage.setItem('authToken', data.token);
             window.location.href = '/index.html';
         } catch (error) {
             loginError.textContent = error.message;
+            btn.disabled = false;
+            btn.textContent = 'Entrar';
         }
     });
 });
