@@ -98,20 +98,21 @@ class Controller {
         if (this.currentPage < totalPages) { this.currentPage++; this.onDataChanged(); }
     }
     handleMenuNavigation = (pageId) => { this.view.showPage(pageId); }
-    handleSubmitTransaction = async (data) => { if (data.id) { await this.model.editTransaction(data.id, data); this.view.showToast('Transação atualizada!'); } else { await this.model.addTransaction(data); this.view.showToast('Transação adicionada!'); } this.onDataChanged(); }
+    _isUnauthorized(e) { return e?.message === 'UNAUTHORIZED'; }
+    handleSubmitTransaction = async (data) => { try { if (data.id) { await this.model.editTransaction(data.id, data); this.view.showToast('Transação atualizada!'); } else { await this.model.addTransaction(data); this.view.showToast('Transação adicionada!'); } this.onDataChanged(); } catch (e) { if (!this._isUnauthorized(e)) this.view.showToast('Erro ao salvar transação. Tente novamente.', 'error'); } }
     handleEditTransaction = (id) => { const t = this.model.getTransactionById(id); if (t) this.view.toggleModal(true, t); }
-    handleDeleteTransaction = async (id) => { await this.model.deleteTransaction(id); this.view.showToast('Transação excluída.'); this.onDataChanged(); }
+    handleDeleteTransaction = async (id) => { try { await this.model.deleteTransaction(id); this.view.showToast('Transação excluída.'); this.onDataChanged(); } catch (e) { if (!this._isUnauthorized(e)) this.view.showToast('Erro ao excluir transação.', 'error'); } }
     handleThemeToggle = () => { document.body.classList.toggle('dark-mode'); localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light'); }
-    handleSaveSettings = (newName) => { /* A lógica de salvar nome do usuário ainda é local */ this.view.showToast('Perfil salvo!'); }
-    handleClearAllData = async () => { await this.model.clearAllData(); this.view.showToast('Todas as transações foram apagadas.'); this.onDataChanged(); }
+    handleSaveSettings = async (newName) => { try { await this.model.updateProfile(newName); this.view.displayUserSettings(this.model.userSettings); this.view.showToast('Perfil salvo!'); } catch (e) { if (!this._isUnauthorized(e)) this.view.showToast('Erro ao salvar perfil.', 'error'); } }
+    handleClearAllData = async () => { try { await this.model.clearAllData(); this.view.showToast('Todas as transações foram apagadas.'); this.onDataChanged(); } catch (e) { if (!this._isUnauthorized(e)) this.view.showToast('Erro ao apagar dados.', 'error'); } }
     handleLogout = () => { localStorage.removeItem('loggedInUser'); localStorage.removeItem('authToken'); window.location.href = '/login'; }
-    handleUpdateBudget = async (category, amount) => { await this.model.updateBudget(category, amount); this.view.showToast('Orçamento salvo!'); this.onDataChanged(); }
-    handleDeleteBudget = async (category) => { await this.model.deleteBudget(category); this.view.showToast('Orçamento removido.'); this.onDataChanged(); }
-    handleAddRecurring = async (data) => { await this.model.addRecurringTransaction(data); this.view.showToast('Recorrência salva!'); this.onDataChanged(); }
-    handleDeleteRecurring = async (id) => { await this.model.deleteRecurringTransaction(id); this.view.showToast('Recorrência removida.'); this.onDataChanged(); }
-    handleAddReminder = async (data) => { await this.model.addReminder(data); this.view.showToast('Lembrete adicionado!'); this.onDataChanged(); }
-    handleUpdateReminder = async (id, isPaid) => { await this.model.updateReminder(id, isPaid); this.onDataChanged(); }
-    handleDeleteReminder = async (id) => { await this.model.deleteReminder(id); this.view.showToast('Lembrete removido.'); this.onDataChanged(); }
+    handleUpdateBudget = async (category, amount) => { try { await this.model.updateBudget(category, amount); this.view.showToast('Orçamento salvo!'); this.onDataChanged(); } catch (e) { if (!this._isUnauthorized(e)) this.view.showToast('Erro ao salvar orçamento.', 'error'); } }
+    handleDeleteBudget = async (category) => { try { await this.model.deleteBudget(category); this.view.showToast('Orçamento removido.'); this.onDataChanged(); } catch (e) { if (!this._isUnauthorized(e)) this.view.showToast('Erro ao remover orçamento.', 'error'); } }
+    handleAddRecurring = async (data) => { try { await this.model.addRecurringTransaction(data); this.view.showToast('Recorrência salva!'); this.onDataChanged(); } catch (e) { if (!this._isUnauthorized(e)) this.view.showToast('Erro ao salvar recorrência.', 'error'); } }
+    handleDeleteRecurring = async (id) => { try { await this.model.deleteRecurringTransaction(id); this.view.showToast('Recorrência removida.'); this.onDataChanged(); } catch (e) { if (!this._isUnauthorized(e)) this.view.showToast('Erro ao remover recorrência.', 'error'); } }
+    handleAddReminder = async (data) => { try { await this.model.addReminder(data); this.view.showToast('Lembrete adicionado!'); this.onDataChanged(); } catch (e) { if (!this._isUnauthorized(e)) this.view.showToast('Erro ao adicionar lembrete.', 'error'); } }
+    handleUpdateReminder = async (id, isPaid) => { try { await this.model.updateReminder(id, isPaid); this.onDataChanged(); } catch (e) { if (!this._isUnauthorized(e)) this.view.showToast('Erro ao atualizar lembrete.', 'error'); } }
+    handleDeleteReminder = async (id) => { try { await this.model.deleteReminder(id); this.view.showToast('Lembrete removido.'); this.onDataChanged(); } catch (e) { if (!this._isUnauthorized(e)) this.view.showToast('Erro ao remover lembrete.', 'error'); } }
     handleExportCSV = () => { const transactions = this.model.getTransactions(); if (transactions.length === 0) { this.view.showToast('Nenhuma transação para exportar.', 'error'); return; } this.view.exportToCSV(transactions); this.view.showToast('CSV exportado com sucesso!'); }
 }
 

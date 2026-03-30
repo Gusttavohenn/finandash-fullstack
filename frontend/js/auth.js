@@ -48,10 +48,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const name = document.getElementById('signup-name').value;
         const email = document.getElementById('signup-email').value;
         const password = document.getElementById('signup-password').value;
+        const confirmPassword = document.getElementById('signup-confirm-password').value;
         const btn = signupForm.querySelector('button[type="submit"]');
 
         if (password.length < 6) {
             signupError.textContent = 'A senha deve ter no mínimo 6 caracteres.';
+            return;
+        }
+        if (password !== confirmPassword) {
+            signupError.textContent = 'As senhas não coincidem.';
             return;
         }
 

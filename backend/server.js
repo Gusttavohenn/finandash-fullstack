@@ -70,6 +70,16 @@ app.post('/api/login', authLimiter, async (req, res) => {
     } catch (error) { console.error(error); res.status(500).json({ message: 'Erro interno no servidor.' }); }
 });
 
+// --- ROTA DE PERFIL ---
+app.put('/api/profile', authenticateToken, async (req, res) => {
+    try {
+        const { name } = req.body;
+        if (!name) return res.status(400).json({ message: 'Nome é obrigatório.' });
+        const r = await db.query('UPDATE users SET name = $1 WHERE id = $2 RETURNING id, name, email', [name, req.user.id]);
+        res.json(r.rows[0]);
+    } catch (e) { console.error(e); res.status(500).json({ message: 'Erro ao atualizar perfil.' }); }
+});
+
 // --- ROTAS DE TRANSAÇÕES ---
 app.get('/api/transactions', authenticateToken, async (req, res) => { try { const r = await db.query("SELECT * FROM transactions WHERE userId = $1 ORDER BY date DESC, id DESC", [req.user.id]); res.json(r.rows); } catch (e) { console.error(e); res.status(500).json({message: 'Erro ao buscar transações.'}); } });
 app.post('/api/transactions', authenticateToken, async (req, res) => { try { const { description, amount, date, type, category, paymentMethod } = req.body; const finalAmount = type === 'expense' ? -Math.abs(amount) : Math.abs(amount); const r = await db.query(`INSERT INTO transactions (description, amount, date, type, category, paymentMethod, userId) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`, [description, finalAmount, date, type, category, paymentMethod, req.user.id]); res.status(201).json(r.rows[0]); } catch (e) { console.error(e); res.status(500).json({message: 'Erro ao adicionar transação.'}); } });
@@ -108,6 +118,9 @@ app.get('/api/reminders', authenticateToken, async (req, res) => { try { const r
 app.post('/api/reminders', authenticateToken, async (req, res) => { try { const { description, amount, dueDate } = req.body; const r = await db.query(`INSERT INTO reminders (description, amount, dueDate, userId) VALUES ($1, $2, $3, $4) RETURNING *`, [description, amount, dueDate, req.user.id]); res.status(201).json(r.rows[0]); } catch (e) { console.error(e); res.status(500).json({message: 'Erro ao salvar lembrete.'}); } });
 app.put('/api/reminders/:id', authenticateToken, async (req, res) => { try { const { isPaid } = req.body; const r = await db.query(`UPDATE reminders SET isPaid = $1 WHERE id = $2 AND userId = $3 RETURNING *`, [isPaid, req.params.id, req.user.id]); if (r.rows.length === 0) return res.status(404).json({ message: "Lembrete não encontrado." }); res.json(r.rows[0]); } catch (e) { console.error(e); res.status(500).json({message: 'Erro ao atualizar lembrete.'}); } });
 app.delete('/api/reminders/:id', authenticateToken, async (req, res) => { try { const r = await db.query("DELETE FROM reminders WHERE id = $1 AND userId = $2", [req.params.id, req.user.id]); if (r.rowCount === 0) return res.status(404).json({ message: "Lembrete não encontrado." }); res.sendStatus(204); } catch (e) { console.error(e); res.status(500).json({message: 'Erro ao excluir lembrete.'}); } });
+
+// --- HEALTH CHECK ---
+app.get('/health', (req, res) => res.status(200).json({ status: 'ok' }));
 
 // --- Inicia o servidor e cria as tabelas ---
 app.listen(PORT, () => {

@@ -18,16 +18,26 @@ class Model {
             'Authorization': `Bearer ${token}`
         };
     }
+    async _fetch(url, options) {
+        const res = await fetch(url, options);
+        if (res.status === 401 || res.status === 403) {
+            localStorage.removeItem('loggedInUser');
+            localStorage.removeItem('authToken');
+            window.location.href = '/login';
+            throw new Error('UNAUTHORIZED');
+        }
+        return res;
+    }
 
     async loadInitialData() {
         try {
-            await fetch(`${this.API_URL}/recurring/generate`, { method: 'POST', headers: this._getAuthHeaders() });
+            await this._fetch(`${this.API_URL}/recurring/generate`, { method: 'POST', headers: this._getAuthHeaders() });
 
             const [transactions, budgets, recurring, reminders] = await Promise.all([
-                fetch(`${this.API_URL}/transactions`, { headers: this._getAuthHeaders() }).then(res => res.json()),
-                fetch(`${this.API_URL}/budgets`, { headers: this._getAuthHeaders() }).then(res => res.json()),
-                fetch(`${this.API_URL}/recurring`, { headers: this._getAuthHeaders() }).then(res => res.json()),
-                fetch(`${this.API_URL}/reminders`, { headers: this._getAuthHeaders() }).then(res => res.json())
+                this._fetch(`${this.API_URL}/transactions`, { headers: this._getAuthHeaders() }).then(res => res.json()),
+                this._fetch(`${this.API_URL}/budgets`, { headers: this._getAuthHeaders() }).then(res => res.json()),
+                this._fetch(`${this.API_URL}/recurring`, { headers: this._getAuthHeaders() }).then(res => res.json()),
+                this._fetch(`${this.API_URL}/reminders`, { headers: this._getAuthHeaders() }).then(res => res.json())
             ]);
             
             this.transactions = transactions;
@@ -45,17 +55,18 @@ class Model {
     }
 
     // manip API
-    async addTransaction(data) { const res = await fetch(`${this.API_URL}/transactions`, { method: 'POST', headers: this._getAuthHeaders(), body: JSON.stringify(data) }); this.transactions.unshift(await res.json()); }
-    async editTransaction(id, data) { const res = await fetch(`${this.API_URL}/transactions/${id}`, { method: 'PUT', headers: this._getAuthHeaders(), body: JSON.stringify(data) }); const updated = await res.json(); const index = this.transactions.findIndex(t => t.id === id); if (index !== -1) this.transactions[index] = updated; }
-    async deleteTransaction(id) { await fetch(`${this.API_URL}/transactions/${id}`, { method: 'DELETE', headers: this._getAuthHeaders() }); this.transactions = this.transactions.filter(t => t.id !== id); }
-    async clearAllData() { await fetch(`${this.API_URL}/transactions`, { method: 'DELETE', headers: this._getAuthHeaders() }); this.transactions = []; }
-    async updateBudget(category, amount) { await fetch(`${this.API_URL}/budgets`, { method: 'POST', headers: this._getAuthHeaders(), body: JSON.stringify({ category, amount }) }); if (amount > 0) this.budgets[category] = amount; else delete this.budgets[category]; }
+    async addTransaction(data) { const res = await this._fetch(`${this.API_URL}/transactions`, { method: 'POST', headers: this._getAuthHeaders(), body: JSON.stringify(data) }); this.transactions.unshift(await res.json()); }
+    async editTransaction(id, data) { const res = await this._fetch(`${this.API_URL}/transactions/${id}`, { method: 'PUT', headers: this._getAuthHeaders(), body: JSON.stringify(data) }); const updated = await res.json(); const index = this.transactions.findIndex(t => t.id === id); if (index !== -1) this.transactions[index] = updated; }
+    async deleteTransaction(id) { await this._fetch(`${this.API_URL}/transactions/${id}`, { method: 'DELETE', headers: this._getAuthHeaders() }); this.transactions = this.transactions.filter(t => t.id !== id); }
+    async clearAllData() { await this._fetch(`${this.API_URL}/transactions`, { method: 'DELETE', headers: this._getAuthHeaders() }); this.transactions = []; }
+    async updateBudget(category, amount) { await this._fetch(`${this.API_URL}/budgets`, { method: 'POST', headers: this._getAuthHeaders(), body: JSON.stringify({ category, amount }) }); if (amount > 0) this.budgets[category] = amount; else delete this.budgets[category]; }
     async deleteBudget(category) { await this.updateBudget(category, 0); }
-    async addRecurringTransaction(data) { const res = await fetch(`${this.API_URL}/recurring`, { method: 'POST', headers: this._getAuthHeaders(), body: JSON.stringify(data) }); this.recurringTransactions.push(await res.json()); }
-    async deleteRecurringTransaction(id) { await fetch(`${this.API_URL}/recurring/${id}`, { method: 'DELETE', headers: this._getAuthHeaders() }); this.recurringTransactions = this.recurringTransactions.filter(rt => rt.id !== id); }
-    async addReminder(data) { const res = await fetch(`${this.API_URL}/reminders`, { method: 'POST', headers: this._getAuthHeaders(), body: JSON.stringify(data) }); this.reminders.push(await res.json()); }
-    async updateReminder(id, isPaid) { const res = await fetch(`${this.API_URL}/reminders/${id}`, { method: 'PUT', headers: this._getAuthHeaders(), body: JSON.stringify({ isPaid }) }); const updated = await res.json(); const index = this.reminders.findIndex(r => r.id === id); if (index !== -1) this.reminders[index] = updated; }
-    async deleteReminder(id) { await fetch(`${this.API_URL}/reminders/${id}`, { method: 'DELETE', headers: this._getAuthHeaders() }); this.reminders = this.reminders.filter(r => r.id !== id); }
+    async addRecurringTransaction(data) { const res = await this._fetch(`${this.API_URL}/recurring`, { method: 'POST', headers: this._getAuthHeaders(), body: JSON.stringify(data) }); this.recurringTransactions.push(await res.json()); }
+    async deleteRecurringTransaction(id) { await this._fetch(`${this.API_URL}/recurring/${id}`, { method: 'DELETE', headers: this._getAuthHeaders() }); this.recurringTransactions = this.recurringTransactions.filter(rt => rt.id !== id); }
+    async addReminder(data) { const res = await this._fetch(`${this.API_URL}/reminders`, { method: 'POST', headers: this._getAuthHeaders(), body: JSON.stringify(data) }); this.reminders.push(await res.json()); }
+    async updateReminder(id, isPaid) { const res = await this._fetch(`${this.API_URL}/reminders/${id}`, { method: 'PUT', headers: this._getAuthHeaders(), body: JSON.stringify({ isPaid }) }); const updated = await res.json(); const index = this.reminders.findIndex(r => r.id === id); if (index !== -1) this.reminders[index] = updated; }
+    async deleteReminder(id) { await this._fetch(`${this.API_URL}/reminders/${id}`, { method: 'DELETE', headers: this._getAuthHeaders() }); this.reminders = this.reminders.filter(r => r.id !== id); }
+    async updateProfile(name) { const res = await this._fetch(`${this.API_URL}/profile`, { method: 'PUT', headers: this._getAuthHeaders(), body: JSON.stringify({ name }) }); if (!res.ok) { const d = await res.json(); throw new Error(d.message); } this.userSettings.name = name; const user = JSON.parse(localStorage.getItem('loggedInUser')); user.name = name; localStorage.setItem('loggedInUser', JSON.stringify(user)); }
 
     // Get e calc
     getTransactions() { return this.transactions.sort((a, b) => new Date(b.date) - new Date(a.date)); }

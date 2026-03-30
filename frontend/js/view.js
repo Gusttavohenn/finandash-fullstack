@@ -53,6 +53,7 @@ class View {
     }
 
     _formatCurrency(value) { return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+    _safe(str) { const d = document.createElement('div'); d.textContent = str ?? ''; return d.innerHTML; }
 
     renderCards(totals) {
         this.totalRevenueEl.textContent = this._formatCurrency(totals.revenue);
@@ -66,9 +67,9 @@ class View {
             this.transactionsTableBody.insertRow().innerHTML = `<td colspan="5" style="text-align: center;">Nenhuma transação encontrada.</td>`; 
             return; 
         }
-        transactions.forEach(t => { 
-            const d = new Date(t.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' }); 
-            this.transactionsTableBody.insertRow().innerHTML = `<td>${t.description}</td><td>${d}</td><td class="${t.type}">${this._formatCurrency(t.amount)}</td><td>${t.category}</td><td>${t.paymentmethod || '---'}</td>`; 
+        transactions.forEach(t => {
+            const d = new Date(t.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+            this.transactionsTableBody.insertRow().innerHTML = `<td>${this._safe(t.description)}</td><td>${d}</td><td class="${t.type}">${this._formatCurrency(t.amount)}</td><td>${this._safe(t.category)}</td><td>${this._safe(t.paymentmethod || '---')}</td>`;
         });
     }
 
@@ -78,9 +79,9 @@ class View {
             this.fullTransactionsTableBody.insertRow().innerHTML = `<td colspan="6" style="text-align: center;">Nenhuma transação encontrada para os filtros selecionados.</td>`; 
             return; 
         }
-        transactions.forEach(t => { 
-            const d = new Date(t.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' }); 
-            this.fullTransactionsTableBody.insertRow().innerHTML = `<td>${t.description}</td><td>${d}</td><td class="${t.type}">${this._formatCurrency(t.amount)}</td><td>${t.category}</td><td>${t.paymentmethod || '---'}</td><td><button class="action-btn edit" data-id="${t.id}"><i class="fas fa-edit"></i></button><button class="action-btn delete" data-id="${t.id}"><i class="fas fa-trash"></i></button></td>`; 
+        transactions.forEach(t => {
+            const d = new Date(t.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+            this.fullTransactionsTableBody.insertRow().innerHTML = `<td>${this._safe(t.description)}</td><td>${d}</td><td class="${t.type}">${this._formatCurrency(t.amount)}</td><td>${this._safe(t.category)}</td><td>${this._safe(t.paymentmethod || '---')}</td><td><button class="action-btn edit" data-id="${t.id}"><i class="fas fa-edit"></i></button><button class="action-btn delete" data-id="${t.id}"><i class="fas fa-trash"></i></button></td>`;
         });
     }
 
@@ -144,9 +145,9 @@ class View {
     }
     
     renderPagination(currentPage, totalPages) { if (totalPages <= 1) { this.paginationControls.style.display = 'none'; return; } this.paginationControls.style.display = 'flex'; this.pageInfo.textContent = `Página ${currentPage} de ${totalPages}`; this.prevPageBtn.disabled = currentPage === 1; this.nextPageBtn.disabled = currentPage === totalPages; }
-    renderBudgetsPage(budgets, deleteHandler) { this.budgetsList.innerHTML = ''; if (Object.keys(budgets).length === 0) { this.budgetsList.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Nenhum orçamento definido.</p>'; return; } Object.entries(budgets).forEach(([category, amount]) => { this.budgetsList.innerHTML += `<div class="budget-item"><div class="budget-item-info"><p>${category}</p><span>Limite: ${this._formatCurrency(amount)}</span></div><div class="budget-item-actions"><button data-category="${category}" class="delete-budget-btn"><i class="fas fa-trash"></i></button></div></div>`; }); this.budgetsList.querySelectorAll('.delete-budget-btn').forEach(btn => btn.addEventListener('click', e => deleteHandler(e.currentTarget.dataset.category))); }
-    renderDashboardBudgets(budgetsStatus) { this.dashboardBudgetsContainer.innerHTML = ''; if (budgetsStatus.length === 0) { this.dashboardBudgetsContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Defina orçamentos para ver seu progresso aqui.</p>'; return; } budgetsStatus.forEach(item => { const p = Math.min(item.percentage, 100); const o = item.percentage > 100; this.dashboardBudgetsContainer.innerHTML += `<div class="budget-item-info"><div style="display: flex; justify-content: space-between;"><p>${item.category}</p><span>${this._formatCurrency(item.spent)} / ${this._formatCurrency(item.budget)}</span></div><div class="progress-bar-container"><div class="progress-bar ${o ? 'over-budget' : ''}" style="width: ${p}%;"></div></div></div>`; }); }
-    renderRecurringTransactionsPage(recurringTxs, deleteHandler) { this.recurringList.innerHTML = ''; if (recurringTxs.length === 0) { this.recurringList.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Nenhuma transação recorrente definida.</p>'; return; } recurringTxs.forEach(rt => { const t = rt.type === 'income' ? 'Receita' : 'Despesa'; this.recurringList.innerHTML += `<div class="recurring-item"><div class="recurring-item-info"><p>${rt.description} (${t})</p><span>${this._formatCurrency(rt.amount)} todo dia ${rt.dayOfMonth}</span></div><div class="recurring-item-actions"><button data-id="${rt.id}" class="delete-recurring-btn"><i class="fas fa-trash"></i></button></div></div>`; }); this.recurringList.querySelectorAll('.delete-recurring-btn').forEach(btn => btn.addEventListener('click', e => deleteHandler(parseInt(e.currentTarget.dataset.id)))); }
+    renderBudgetsPage(budgets, deleteHandler) { this.budgetsList.innerHTML = ''; if (Object.keys(budgets).length === 0) { this.budgetsList.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Nenhum orçamento definido.</p>'; return; } Object.entries(budgets).forEach(([category, amount]) => { this.budgetsList.innerHTML += `<div class="budget-item"><div class="budget-item-info"><p>${this._safe(category)}</p><span>Limite: ${this._formatCurrency(amount)}</span></div><div class="budget-item-actions"><button data-category="${this._safe(category)}" class="delete-budget-btn"><i class="fas fa-trash"></i></button></div></div>`; }); this.budgetsList.querySelectorAll('.delete-budget-btn').forEach(btn => btn.addEventListener('click', e => deleteHandler(e.currentTarget.dataset.category))); }
+    renderDashboardBudgets(budgetsStatus) { this.dashboardBudgetsContainer.innerHTML = ''; if (budgetsStatus.length === 0) { this.dashboardBudgetsContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Defina orçamentos para ver seu progresso aqui.</p>'; return; } budgetsStatus.forEach(item => { const p = Math.min(item.percentage, 100); const o = item.percentage > 100; this.dashboardBudgetsContainer.innerHTML += `<div class="budget-item-info"><div style="display: flex; justify-content: space-between;"><p>${this._safe(item.category)}</p><span>${this._formatCurrency(item.spent)} / ${this._formatCurrency(item.budget)}</span></div><div class="progress-bar-container"><div class="progress-bar ${o ? 'over-budget' : ''}" style="width: ${p}%;"></div></div></div>`; }); }
+    renderRecurringTransactionsPage(recurringTxs, deleteHandler) { this.recurringList.innerHTML = ''; if (recurringTxs.length === 0) { this.recurringList.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Nenhuma transação recorrente definida.</p>'; return; } recurringTxs.forEach(rt => { const t = rt.type === 'income' ? 'Receita' : 'Despesa'; this.recurringList.innerHTML += `<div class="recurring-item"><div class="recurring-item-info"><p>${this._safe(rt.description)} (${t})</p><span>${this._formatCurrency(rt.amount)} todo dia ${rt.dayofmonth}</span></div><div class="recurring-item-actions"><button data-id="${rt.id}" class="delete-recurring-btn"><i class="fas fa-trash"></i></button></div></div>`; }); this.recurringList.querySelectorAll('.delete-recurring-btn').forEach(btn => btn.addEventListener('click', e => deleteHandler(parseInt(e.currentTarget.dataset.id)))); }
     renderRemindersPage(reminders, updateHandler, deleteHandler) {
         this.remindersList.innerHTML = '';
         if (reminders.length === 0) { this.remindersList.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Nenhum lembrete cadastrado.</p>'; return; }
@@ -157,7 +158,7 @@ class View {
             item.className = `reminder-item ${r.ispaid ? 'is-paid' : ''} ${isOverdue ? 'is-overdue' : ''}`;
             const amountText = r.amount ? ` - ${this._formatCurrency(parseFloat(r.amount))}` : '';
             const dateText = dueDate.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-            item.innerHTML = `<div class="reminder-item-info"><p>${r.description}${amountText}</p><span>Vencimento: ${dateText}</span></div><div class="reminder-item-actions"><i class="toggle-paid-btn fas ${r.ispaid ? 'fa-check-square' : 'fa-square'}" data-id="${r.id}" data-status="${r.ispaid}"></i><button data-id="${r.id}" class="delete-reminder-btn"><i class="fas fa-trash"></i></button></div>`;
+            item.innerHTML = `<div class="reminder-item-info"><p>${this._safe(r.description)}${amountText}</p><span>Vencimento: ${dateText}</span></div><div class="reminder-item-actions"><i class="toggle-paid-btn fas ${r.ispaid ? 'fa-check-square' : 'fa-square'}" data-id="${r.id}" data-status="${r.ispaid}"></i><button data-id="${r.id}" class="delete-reminder-btn"><i class="fas fa-trash"></i></button></div>`;
             this.remindersList.appendChild(item);
         });
         this.remindersList.querySelectorAll('.toggle-paid-btn').forEach(btn => { btn.addEventListener('click', e => { const id = parseInt(e.currentTarget.dataset.id); const s = e.currentTarget.dataset.status === 'true'; updateHandler(id, !s); }); });
@@ -173,7 +174,7 @@ class View {
             item.className = `reminder-item ${isOverdue ? 'is-overdue' : ''}`;
             const amountText = r.amount ? ` - ${this._formatCurrency(parseFloat(r.amount))}` : '';
             const dateText = dueDate.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-            item.innerHTML = `<div class="reminder-item-info"><p>${r.description}${amountText}</p><span>Vencimento: ${dateText}</span></div>`;
+            item.innerHTML = `<div class="reminder-item-info"><p>${this._safe(r.description)}${amountText}</p><span>Vencimento: ${dateText}</span></div>`;
             this.dashboardRemindersContainer.appendChild(item);
         });
     }
