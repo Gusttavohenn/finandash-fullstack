@@ -204,9 +204,11 @@ class View {
 
     showPage(pageId) { this.pages.forEach(p => p.classList.add('page-hidden')); document.getElementById(`${pageId}-page`).classList.remove('page-hidden'); this.updateMenuActiveState(pageId); }
     updateMenuActiveState(pageId) { this.menuItems.forEach(i => { i.classList.remove('active'); if (i.dataset.page === pageId) i.classList.add('active'); }); }
-    toggleModal(show = true, transaction = null) { 
-        if (show) { 
-            this.transactionForm.reset(); 
+    toggleModal(show = true, transaction = null) {
+        const impactEl = document.getElementById('balance-impact');
+        if (impactEl) { impactEl.textContent = ''; impactEl.className = 'balance-impact'; }
+        if (show) {
+            this.transactionForm.reset();
             if (transaction) { 
                 this.modalTitle.textContent = 'Editar Transação'; 
                 this.transactionForm['transaction-id'].value = transaction.id; 
@@ -233,6 +235,60 @@ class View {
     showToast(message, type = 'success') { const t = document.createElement('div'); t.className = `toast ${type}`; t.textContent = message; this.toastContainer.appendChild(t); setTimeout(() => { t.remove(); }, 4000); }
     showLoading() { const o = document.getElementById('skeleton-overlay'); if (o) o.classList.remove('hidden'); }
     hideLoading() { const o = document.getElementById('skeleton-overlay'); if (o) o.classList.add('hidden'); }
+    showSearchModal() { document.getElementById('global-search-modal').classList.remove('page-hidden'); document.getElementById('global-search-input').value = ''; document.getElementById('search-results').innerHTML = ''; setTimeout(() => document.getElementById('global-search-input').focus(), 50); }
+    hideSearchModal() { document.getElementById('global-search-modal').classList.add('page-hidden'); }
+    renderSearchResults(results, onSelect) {
+        const container = document.getElementById('search-results');
+        const { transactions, reminders, budgets } = results;
+        const total = transactions.length + reminders.length + budgets.length;
+        if (total === 0) { container.innerHTML = '<div class="search-empty">Nenhum resultado encontrado.</div>'; return; }
+        let html = '';
+        const fmt = (v) => parseFloat(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        if (transactions.length) {
+            html += '<div class="search-group-label">Transações</div>';
+            transactions.forEach(t => {
+                const d = new Date(t.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+                html += `<div class="search-result-item" data-type="transactions" data-id="${t.id}"><div class="search-result-icon ${t.type}"><i class="fas fa-${t.type==='income'?'arrow-up':'arrow-down'}"></i></div><div class="search-result-info"><div class="search-result-title">${this._safe(t.description)}</div><div class="search-result-sub">${this._safe(t.category)} • ${d}</div></div><span class="search-result-value" style="color:${t.type==='income'?'var(--income-color)':'var(--expense-color)'}">${fmt(t.amount)}</span></div>`;
+            });
+        }
+        if (reminders.length) {
+            html += '<div class="search-group-label">Lembretes</div>';
+            reminders.forEach(r => {
+                const d = new Date(r.duedate).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+                html += `<div class="search-result-item" data-type="reminders"><div class="search-result-icon reminder"><i class="fas fa-bell"></i></div><div class="search-result-info"><div class="search-result-title">${this._safe(r.description)}</div><div class="search-result-sub">Vence em ${d}</div></div>${r.amount ? `<span class="search-result-value">${fmt(r.amount)}</span>` : ''}</div>`;
+            });
+        }
+        if (budgets.length) {
+            html += '<div class="search-group-label">Metas</div>';
+            budgets.forEach(([cat, val]) => {
+                html += `<div class="search-result-item" data-type="budgets"><div class="search-result-icon budget"><i class="fas fa-bullseye"></i></div><div class="search-result-info"><div class="search-result-title">${this._safe(cat)}</div><div class="search-result-sub">Meta mensal</div></div><span class="search-result-value">${fmt(val)}</span></div>`;
+            });
+        }
+        container.innerHTML = html;
+        container.querySelectorAll('.search-result-item').forEach(item => {
+            item.addEventListener('click', () => onSelect(item.dataset.type, item.dataset.id));
+        });
+    }
+    renderBalanceImpact(amount, type, currentBalance) {
+        const el = document.getElementById('balance-impact');
+        if (!el) return;
+        if (!amount || isNaN(amount)) { el.textContent = ''; el.className = 'balance-impact'; return; }
+        const impact = type === 'income' ? Math.abs(amount) : -Math.abs(amount);
+        const newBalance = currentBalance + impact;
+        const sign = impact >= 0 ? '+' : '';
+        const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        el.textContent = `Impacto: ${sign}${fmt(impact)} → Saldo estimado: ${fmt(newBalance)}`;
+        el.className = `balance-impact ${impact >= 0 ? 'positive' : 'negative'}`;
+    }
+    bindSearchInput(h) { const i = document.getElementById('global-search-input'); if (i) i.addEventListener('input', e => h(e.target.value)); }
+    bindOpenSearch(h) { const btn = document.getElementById('open-search-btn'); if (btn) btn.addEventListener('click', e => { e.preventDefault(); h(); }); }
+    bindSearchOverlayClose(h) { const o = document.getElementById('global-search-modal'); if (o) o.addEventListener('click', e => { if (e.target === o) h(); }); }
+    bindBalanceImpact(h) {
+        const amount = document.getElementById('amount');
+        const type = document.getElementById('type');
+        if (amount) amount.addEventListener('input', () => h(amount.value, type.value));
+        if (type) type.addEventListener('change', () => h(amount.value, type.value));
+    }
     bindExportCSV(h) { if (this.exportCsvBtn) this.exportCsvBtn.addEventListener('click', h); }
     bindPDF(h) { if (this.pdfBtn) this.pdfBtn.addEventListener('click', h); }
     generatePDF(transactions, totals, expensesByCategory, userName) {

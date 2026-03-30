@@ -12,9 +12,14 @@ class Controller {
     _setupKeyboardShortcuts() {
         document.addEventListener('keydown', (e) => {
             const tag = document.activeElement?.tagName;
-            if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-            if (e.key === 'n' || e.key === 'N') { e.preventDefault(); this.view.toggleModal(true); }
-            if (e.key === 'Escape') { this.view.toggleModal(false); }
+            const inInput = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+            const searchOpen = !document.getElementById('global-search-modal')?.classList.contains('page-hidden');
+            if (e.key === 'Escape') { this.view.toggleModal(false); this.view.hideSearchModal(); return; }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); this.view.showSearchModal(); return; }
+            if (!inInput && !searchOpen) {
+                if (e.key === '/') { e.preventDefault(); this.view.showSearchModal(); }
+                if (e.key === 'n' || e.key === 'N') { e.preventDefault(); this.view.toggleModal(true); }
+            }
         });
     }
     _setupBeforeUnload() {
@@ -137,6 +142,10 @@ class Controller {
         this.view.bindExportCSV(this.handleExportCSV);
         this.view.bindImportCSV(this.handleImportCSV);
         this.view.bindPDF(this.handleExportPDF);
+        this.view.bindOpenSearch(() => this.view.showSearchModal());
+        this.view.bindSearchInput(this.handleGlobalSearch);
+        this.view.bindSearchOverlayClose(() => this.view.hideSearchModal());
+        this.view.bindBalanceImpact(this.handleBalanceImpact);
     }
 
     // handle
@@ -165,6 +174,18 @@ class Controller {
     handleAddReminder = async (data) => { try { await this.model.addReminder(data); this.view.showToast('Lembrete adicionado!'); this.onDataChanged(); } catch (e) { if (!this._isUnauthorized(e)) this.view.showToast('Erro ao adicionar lembrete.', 'error'); } }
     handleUpdateReminder = async (id, isPaid) => { try { await this.model.updateReminder(id, isPaid); this.onDataChanged(); } catch (e) { if (!this._isUnauthorized(e)) this.view.showToast('Erro ao atualizar lembrete.', 'error'); } }
     handleDeleteReminder = async (id) => { try { await this.model.deleteReminder(id); this.view.showToast('Lembrete removido.'); this.onDataChanged(); } catch (e) { if (!this._isUnauthorized(e)) this.view.showToast('Erro ao remover lembrete.', 'error'); } }
+    handleGlobalSearch = (term) => {
+        const results = this.model.globalSearch(term);
+        this.view.renderSearchResults(results, (type, id) => {
+            this.view.hideSearchModal();
+            this.view.showPage(type === 'transactions' ? 'transactions' : type === 'reminders' ? 'reminders' : 'budgets');
+        });
+    }
+    handleBalanceImpact = (amountStr, type) => {
+        const amount = parseFloat(amountStr);
+        const currentBalance = this.model.calculateTotals(this.model.getTransactions()).balance;
+        this.view.renderBalanceImpact(amount, type, currentBalance);
+    }
     handleExportPDF = () => {
         const transactions = this.model.getTransactionsByDateRange('thisMonth');
         const totals = this.model.calculateTotals(transactions);

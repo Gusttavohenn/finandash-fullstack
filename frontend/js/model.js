@@ -120,6 +120,20 @@ class Model {
     calculateTotals(transactions) { const t = transactions.reduce((a, t) => { if (t.type === 'income') a.revenue += parseFloat(t.amount); else if (t.type === 'expense') a.expenses += parseFloat(t.amount); return a; }, { revenue: 0, expenses: 0 }); t.balance = t.revenue + t.expenses; return t; }
     getExpensesByCategory(transactions) { return transactions.filter(t => t.type === 'expense').reduce((a, t) => { const { category: c, amount: m } = t; if (!a[c]) a[c] = 0; a[c] += Math.abs(parseFloat(m)); return a; }, {}); }
     getMonthlySummary(numMonths) { const s = { labels: [], incomeData: [], expenseData: [] }; const n = new Date(); n.setDate(15); for (let i = 0; i < numMonths; i++) { const d = new Date(n.getFullYear(), n.getMonth() - i, 15); const l = `${d.toLocaleString('pt-BR', { month: 'short' }).replace('.', '')}/${d.getFullYear()}`; s.labels.push(l.charAt(0).toUpperCase() + l.slice(1)); const m = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; const mT = this.transactions.filter(t => t.date.startsWith(m)); let tI = 0; let tE = 0; mT.forEach(t => { if (t.type === 'income') tI += parseFloat(t.amount); else tE += Math.abs(parseFloat(t.amount)); }); s.incomeData.push(tI); s.expenseData.push(tE); } s.labels.reverse(); s.incomeData.reverse(); s.expenseData.reverse(); return s; }
+    globalSearch(term) {
+        const q = term.toLowerCase().trim();
+        if (!q) return { transactions: [], reminders: [], budgets: [] };
+        const transactions = this.transactions.filter(t =>
+            t.description.toLowerCase().includes(q) || t.category.toLowerCase().includes(q)
+        ).slice(0, 5);
+        const reminders = this.reminders.filter(r =>
+            r.description.toLowerCase().includes(q)
+        ).slice(0, 3);
+        const budgets = Object.entries(this.budgets).filter(([cat]) =>
+            cat.toLowerCase().includes(q)
+        ).slice(0, 3);
+        return { transactions, reminders, budgets };
+    }
     getNextMonthForecast() {
         const now = new Date();
         const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
