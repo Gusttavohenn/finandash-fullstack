@@ -164,23 +164,32 @@ body {
 @media (max-width: 1200px) { .data-section { grid-template-columns: 1fr; } }
 @media (max-width: 768px) {
     .dashboard-container { flex-direction: column; }
-    .sidebar { width: 100%; height: 60px; flex-direction: row; align-items: center; padding: 0 15px; border-right: none; border-bottom: 1px solid var(--border-color); position: fixed; top: 0; left: 0; z-index: 1000; }
-    .sidebar-header .logo { margin: 0; font-size: 1.2rem; }
+    .sidebar { width: 100%; height: 60px; flex-direction: row; align-items: center; padding: 0 15px; border-right: none; border-bottom: 1px solid var(--border-color); position: fixed; top: 0; left: 0; z-index: 1000; overflow-x: auto; }
+    .sidebar-header .logo { margin: 0; font-size: 1.2rem; flex-shrink: 0; }
     .sidebar-header .logo span { display: none; }
-    .sidebar-menu { display: flex; flex-direction: row; margin-left: auto; gap: 5px; }
-    .sidebar-menu .menu-item { margin: 0; padding: 8px; }
+    .sidebar-menu { display: flex; flex-direction: row; margin-left: auto; gap: 2px; }
+    .sidebar-menu .menu-item { margin: 0; padding: 8px 10px; font-size: 1rem; }
     .sidebar-menu .menu-item span { display: none; }
     .sidebar-menu .logout { display: none; }
-    .main-content { padding: 15px; padding-top: 75px; }
+    .main-content { padding: 12px; padding-top: 72px; }
     .main-header { flex-direction: column; align-items: flex-start; gap: 10px; }
-    .header-title { width: 100%; }
-    .main-header h2 { font-size: 1.6rem; }
-    .chart-container { height: 300px; }
-    .filter-bar { flex-wrap: wrap; }
+    .main-header .header-actions { width: 100%; justify-content: flex-end; }
+    .header-title { width: 100%; flex-direction: column; align-items: flex-start; gap: 8px; }
+    .main-header h2 { font-size: 1.4rem; }
+    .metrics-cards { gap: 12px; }
+    .card-info p { font-size: 1.2rem; }
+    .chart-container { height: 260px; }
+    .filter-bar { flex-wrap: wrap; gap: 8px; }
     .filter-input { width: 100%; flex-grow: unset; }
-    .filter-select { flex-grow: 1; }
+    .filter-select { flex-grow: 1; min-width: 120px; }
     .full-transactions-list, .data-section-single-col { overflow-x: auto; }
     #full-transactions-table, #transactions-table { white-space: nowrap; min-width: 600px; }
+    .modal-content { width: 95%; padding: 20px; max-height: 90vh; overflow-y: auto; }
+    .form-actions { flex-direction: column; gap: 8px; }
+    .form-actions button { width: 100%; }
+    #pagination-controls { gap: 8px; flex-wrap: wrap; }
+    .settings-card { padding: 16px; }
+    .danger-zone { margin-top: 12px; }
 }
 /* --- LOADING OVERLAY --- */
 #loading-overlay {

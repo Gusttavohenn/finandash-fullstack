@@ -75,7 +75,7 @@ class Model {
     getReminders() { return this.reminders.sort((a, b) => new Date(a.duedate) - new Date(b.duedate)); }
     getDashboardReminders() { return this.getReminders().filter(r => !r.ispaid).slice(0, 3); }
     getTransactionById(id) { return this.transactions.find(t => t.id === id); }
-    getFilteredTransactions(filters) { let f = this.getTransactions(); if (filters.searchTerm) f = f.filter(t => t.description.toLowerCase().includes(filters.searchTerm.toLowerCase())); if (filters.type && filters.type !== 'all') f = f.filter(t => t.type === filters.type); if (filters.month && filters.month !== 'all') f = f.filter(t => t.date.startsWith(filters.month)); return f; }
+    getFilteredTransactions(filters) { let f = this.getTransactions(); if (filters.searchTerm) f = f.filter(t => t.description.toLowerCase().includes(filters.searchTerm.toLowerCase())); if (filters.type && filters.type !== 'all') f = f.filter(t => t.type === filters.type); if (filters.category && filters.category !== 'all') f = f.filter(t => t.category === filters.category); if (filters.month && filters.month !== 'all') f = f.filter(t => t.date.startsWith(filters.month)); return f; }
     getTransactionsByDateRange(range) {
         const now = new Date();
         switch (range) {
@@ -88,5 +88,19 @@ class Model {
     calculateTotals(transactions) { const t = transactions.reduce((a, t) => { if (t.type === 'income') a.revenue += parseFloat(t.amount); else if (t.type === 'expense') a.expenses += parseFloat(t.amount); return a; }, { revenue: 0, expenses: 0 }); t.balance = t.revenue + t.expenses; return t; }
     getExpensesByCategory(transactions) { return transactions.filter(t => t.type === 'expense').reduce((a, t) => { const { category: c, amount: m } = t; if (!a[c]) a[c] = 0; a[c] += Math.abs(parseFloat(m)); return a; }, {}); }
     getMonthlySummary(numMonths) { const s = { labels: [], incomeData: [], expenseData: [] }; const n = new Date(); n.setDate(15); for (let i = 0; i < numMonths; i++) { const d = new Date(n.getFullYear(), n.getMonth() - i, 15); const l = `${d.toLocaleString('pt-BR', { month: 'short' }).replace('.', '')}/${d.getFullYear()}`; s.labels.push(l.charAt(0).toUpperCase() + l.slice(1)); const m = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; const mT = this.transactions.filter(t => t.date.startsWith(m)); let tI = 0; let tE = 0; mT.forEach(t => { if (t.type === 'income') tI += parseFloat(t.amount); else tE += Math.abs(parseFloat(t.amount)); }); s.incomeData.push(tI); s.expenseData.push(tE); } s.labels.reverse(); s.incomeData.reverse(); s.expenseData.reverse(); return s; }
+    getBalanceEvolution(numMonths) {
+        const labels = [], balanceData = [];
+        const now = new Date();
+        for (let i = numMonths - 1; i >= 0; i--) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const monthStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+            const label = `${d.toLocaleString('pt-BR', { month: 'short' }).replace('.', '')}/${d.getFullYear()}`;
+            labels.push(label.charAt(0).toUpperCase() + label.slice(1));
+            const monthTxs = this.transactions.filter(t => t.date.startsWith(monthStr));
+            const balance = monthTxs.reduce((sum, t) => sum + parseFloat(t.amount), 0);
+            balanceData.push(parseFloat(balance.toFixed(2)));
+        }
+        return { labels, balanceData };
+    }
     getBudgetsStatus() { const s = this.getExpensesByCategory(this.getTransactionsByDateRange('thisMonth')); return Object.entries(this.budgets).map(([c, b]) => ({ category: c, budget: parseFloat(b), spent: s[c] || 0, percentage: parseFloat(b) > 0 ? ((s[c] || 0) / parseFloat(b)) * 100 : 0 })).sort((a, b) => b.percentage - a.percentage); }
 }

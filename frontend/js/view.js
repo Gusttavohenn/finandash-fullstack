@@ -10,6 +10,8 @@ class View {
         this.expensesChart = null;
         this.monthlySummaryChartContext = document.getElementById('monthlySummaryChart').getContext('2d');
         this.monthlySummaryChart = null;
+        this.balanceEvolutionChartContext = document.getElementById('balanceEvolutionChart').getContext('2d');
+        this.balanceEvolutionChart = null;
         this.themeToggleButton = document.getElementById('theme-toggle');
         this.userNameHeaderEl = document.querySelector('.user-profile span');
         this.pages = document.querySelectorAll('.page-content');
@@ -34,6 +36,7 @@ class View {
         this.confirmActionBtn = document.getElementById('confirm-action-btn');
         this.searchInput = document.getElementById('search-input');
         this.typeFilter = document.getElementById('type-filter');
+        this.categoryFilter = document.getElementById('category-filter');
         this.monthFilter = document.getElementById('month-filter');
         this.dashboardDateFilter = document.getElementById('dashboard-date-filter');
         this.paginationControls = document.getElementById('pagination-controls');
@@ -50,6 +53,7 @@ class View {
         this.reminderForm = document.getElementById('reminder-form');
         this.dashboardRemindersContainer = document.getElementById('dashboard-reminders-container');
         this.exportCsvBtn = document.getElementById('export-csv-btn');
+        this.importCsvInput = document.getElementById('import-csv-input');
     }
 
     _formatCurrency(value) { return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
@@ -135,6 +139,19 @@ class View {
         }
     }
 
+    renderBalanceEvolutionChart(data) {
+        const color = data.balanceData.map(v => v >= 0 ? 'rgba(40,167,69,0.7)' : 'rgba(220,53,69,0.7)');
+        const borderColor = data.balanceData.map(v => v >= 0 ? 'rgba(40,167,69,1)' : 'rgba(220,53,69,1)');
+        if (this.balanceEvolutionChart) {
+            this.balanceEvolutionChart.data.labels = data.labels;
+            this.balanceEvolutionChart.data.datasets[0].data = data.balanceData;
+            this.balanceEvolutionChart.data.datasets[0].backgroundColor = color;
+            this.balanceEvolutionChart.data.datasets[0].borderColor = borderColor;
+            this.balanceEvolutionChart.update();
+        } else {
+            this.balanceEvolutionChart = new Chart(this.balanceEvolutionChartContext, { type: 'bar', data: { labels: data.labels, datasets: [{ label: 'Saldo do Mês', data: data.balanceData, backgroundColor: color, borderColor: borderColor, borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } } });
+        }
+    }
     populateMonthFilter(transactions) {
         const months = new Set(transactions.map(t => t.date.substring(0, 7))); const currentValue = this.monthFilter.value; this.monthFilter.innerHTML = '<option value="all">Todos os Meses</option>';
         Array.from(months).sort().reverse().forEach(month => {
@@ -190,7 +207,7 @@ class View {
                 this.transactionForm.description.value = transaction.description; 
                 this.transactionForm.amount.value = Math.abs(transaction.amount); 
                 this.transactionForm.date.value = transaction.date; 
-                this.transactionForm.category.value = transaction.category; 
+                this.transactionForm.category.value = transaction.category || '';
                 this.transactionForm.type.value = transaction.type; 
                 this.paymentMethodGroup.style.display = transaction.type === 'expense' ? 'block' : 'none'; 
                 if (transaction.type === 'expense') this.paymentMethodSelect.value = transaction.paymentmethod || ''; 
@@ -211,6 +228,25 @@ class View {
     showLoading() { const o = document.getElementById('loading-overlay'); if (o) o.classList.remove('hidden'); }
     hideLoading() { const o = document.getElementById('loading-overlay'); if (o) o.classList.add('hidden'); }
     bindExportCSV(h) { if (this.exportCsvBtn) this.exportCsvBtn.addEventListener('click', h); }
+    bindImportCSV(h) { if (this.importCsvInput) this.importCsvInput.addEventListener('change', e => { const file = e.target.files[0]; if (file) { h(file); e.target.value = ''; } }); }
+    parseCSV(text) {
+        const lines = text.trim().split('\n').filter(l => l.trim());
+        if (lines.length < 2) return [];
+        const rows = lines.slice(1);
+        const transactions = [];
+        for (const line of rows) {
+            const cols = line.split(';').map(c => c.replace(/^"|"$/g, '').trim());
+            if (cols.length < 5) continue;
+            const [description, dateRaw, amountRaw, type, category, paymentMethod] = cols;
+            const [d, m, y] = dateRaw.split('/');
+            const date = `${y}-${m}-${d}`;
+            const amount = parseFloat(amountRaw.replace(',', '.'));
+            const typeEn = type === 'Receita' ? 'income' : 'expense';
+            if (!description || isNaN(amount) || !date || date === 'undefined-undefined-undefined') continue;
+            transactions.push({ description, amount, date, type: typeEn, category, paymentMethod: paymentMethod || null });
+        }
+        return transactions;
+    }
     exportToCSV(transactions) {
         const header = ['Descrição', 'Data', 'Valor', 'Tipo', 'Categoria', 'Método de Pagamento'];
         const rows = transactions.map(t => [
@@ -230,7 +266,7 @@ class View {
         a.click();
         URL.revokeObjectURL(url);
     }
-    getFilterValues() { return { searchTerm: this.searchInput.value, type: this.typeFilter.value, month: this.monthFilter.value }; }
+    getFilterValues() { return { searchTerm: this.searchInput.value, type: this.typeFilter.value, category: this.categoryFilter.value, month: this.monthFilter.value }; }
     getDashboardDateRange() { return this.dashboardDateFilter.value; }
     bindThemeToggler(h) { this.themeToggleButton.addEventListener('click', h); }
     bindMenuNavigation(h) { document.querySelector('.sidebar-menu').addEventListener('click', e => { const mi = e.target.closest('.menu-item'); if (mi?.dataset.page) { e.preventDefault(); h(mi.dataset.page); } }); }
@@ -242,7 +278,7 @@ class View {
     bindTransactionTypeChange() { this.transactionTypeSelect.addEventListener('change', () => { this.paymentMethodGroup.style.display = (this.transactionTypeSelect.value === 'expense') ? 'block' : 'none'; }); }
     bindEditAndDeleteTransaction(editH, deleteH) { this.fullTransactionsTableBody.addEventListener('click', e => { const b = e.target.closest('.action-btn'); if (!b) return; const id = parseInt(b.dataset.id); if (b.classList.contains('edit')) editH(id); else if (b.classList.contains('delete')) this.showConfirmationModal('Você tem certeza que deseja excluir esta transação?', () => deleteH(id)); }); }
     bindConfirmationControls() { this.cancelConfirmationBtn.addEventListener('click', () => this.hideConfirmationModal()); this.confirmationModal.addEventListener('click', e => { if (e.target === this.confirmationModal) this.hideConfirmationModal(); }); }
-    bindFilters(h) { this.searchInput.addEventListener('input', h); this.typeFilter.addEventListener('change', h); this.monthFilter.addEventListener('change', h); }
+    bindFilters(h) { this.searchInput.addEventListener('input', h); this.typeFilter.addEventListener('change', h); this.categoryFilter.addEventListener('change', h); this.monthFilter.addEventListener('change', h); }
     bindDashboardDateFilter(h) { this.dashboardDateFilter.addEventListener('change', h); }
     bindPagination(prevH, nextH) { this.prevPageBtn.addEventListener('click', prevH); this.nextPageBtn.addEventListener('click', nextH); }
     bindBudgetForm(h) { this.budgetForm.addEventListener('submit', e => { e.preventDefault(); const c = this.budgetForm['budget-category'].value; const a = parseFloat(this.budgetForm['budget-amount'].value); if (c && a >= 0) { h(c, a); this.budgetForm.reset(); } }); }

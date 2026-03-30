@@ -9,10 +9,21 @@ class Controller {
         this.init();
     }
 
+    _scheduleAutoLogout() {
+        const token = localStorage.getItem('authToken');
+        if (!token) return;
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const msUntilExpiry = payload.exp * 1000 - Date.now();
+            if (msUntilExpiry <= 0) { this.handleLogout(); return; }
+            setTimeout(() => { this.view.showToast('Sua sessão expirou. Faça login novamente.', 'error'); setTimeout(() => this.handleLogout(), 3000); }, msUntilExpiry);
+        } catch { /* token inválido, ignora */ }
+    }
     async init() {
         const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
         if (!loggedInUser) return;
         this.setupEventListeners();
+        this._scheduleAutoLogout();
         this.view.showLoading();
         try {
             await this.model.loadInitialData();
@@ -39,6 +50,7 @@ class Controller {
         const expensesByCategory = this.model.getExpensesByCategory(dashboardTransactions);
         const budgetsStatus = this.model.getBudgetsStatus();
         const monthlySummary = this.model.getMonthlySummary(6);
+        const balanceEvolution = this.model.getBalanceEvolution(6);
         const filters = this.view.getFilterValues();
         const filteredTransactions = this.model.getFilteredTransactions(filters);
         const { paginatedItems, totalPages } = this.paginate(filteredTransactions);
@@ -49,6 +61,7 @@ class Controller {
         this.view.renderCards(totals);
         this.view.renderChart(expensesByCategory);
         this.view.renderMonthlySummaryChart(monthlySummary);
+        this.view.renderBalanceEvolutionChart(balanceEvolution);
         this.view.renderDashboardBudgets(budgetsStatus);
         this.view.renderDashboardReminders(dashboardReminders);
         this.view.renderTransactionsTable(recentTransactions);
@@ -85,6 +98,7 @@ class Controller {
         this.view.bindRecurringForm(this.handleAddRecurring);
         this.view.bindReminderForm(this.handleAddReminder);
         this.view.bindExportCSV(this.handleExportCSV);
+        this.view.bindImportCSV(this.handleImportCSV);
     }
 
     // handle
@@ -114,6 +128,20 @@ class Controller {
     handleUpdateReminder = async (id, isPaid) => { try { await this.model.updateReminder(id, isPaid); this.onDataChanged(); } catch (e) { if (!this._isUnauthorized(e)) this.view.showToast('Erro ao atualizar lembrete.', 'error'); } }
     handleDeleteReminder = async (id) => { try { await this.model.deleteReminder(id); this.view.showToast('Lembrete removido.'); this.onDataChanged(); } catch (e) { if (!this._isUnauthorized(e)) this.view.showToast('Erro ao remover lembrete.', 'error'); } }
     handleExportCSV = () => { const transactions = this.model.getTransactions(); if (transactions.length === 0) { this.view.showToast('Nenhuma transação para exportar.', 'error'); return; } this.view.exportToCSV(transactions); this.view.showToast('CSV exportado com sucesso!'); }
+    handleImportCSV = async (file) => {
+        const text = await file.text();
+        const transactions = this.view.parseCSV(text);
+        if (transactions.length === 0) { this.view.showToast('Nenhuma transação válida encontrada no CSV.', 'error'); return; }
+        this.view.showLoading();
+        let imported = 0, errors = 0;
+        for (const t of transactions) {
+            try { await this.model.addTransaction(t); imported++; } catch { errors++; }
+        }
+        this.view.hideLoading();
+        this.onDataChanged();
+        if (errors > 0) this.view.showToast(`${imported} importadas, ${errors} com erro.`, 'error');
+        else this.view.showToast(`${imported} transações importadas com sucesso!`);
+    }
 }
 
 const applyInitialTheme = () => { if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode'); }

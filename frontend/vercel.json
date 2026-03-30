@@ -1,5 +1,8 @@
 {
   "cleanUrls": true,
+  "headers": [
+    { "source": "/sw.js", "headers": [{ "key": "Cache-Control", "value": "no-cache" }, { "key": "Service-Worker-Allowed", "value": "/" }] }
+  ],
   "rewrites": [
     { "source": "/dashboard", "destination": "/index.html" },
     { "source": "/login", "destination": "/login.html" },

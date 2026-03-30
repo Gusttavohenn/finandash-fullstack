@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NEXO - Seu Aliado Financeiro</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4A69BD">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="NEXO">
     <script src="js/protect.js"></script>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -67,6 +73,10 @@
                         <canvas id="monthlySummaryChart"></canvas>
                     </div>
                 </section>
+                <section class="data-section-single-col">
+                    <h3>Evolução do Saldo</h3>
+                    <canvas id="balanceEvolutionChart"></canvas>
+                </section>
                 <div class="data-section-single-col">
                     <h3>Transações Recentes</h3>
                     <table id="transactions-table">
@@ -81,11 +91,13 @@
                     <h2>Gerenciar Transações</h2>
                     <div class="header-actions">
                         <button id="export-csv-btn" class="btn-secondary"><i class="fas fa-download"></i> Exportar CSV</button>
+                        <label for="import-csv-input" class="btn-secondary" style="cursor:pointer;"><i class="fas fa-upload"></i> Importar CSV</label>
+                        <input type="file" id="import-csv-input" accept=".csv" style="display:none;">
                         <button id="add-transaction-btn" class="btn-primary">Adicionar Nova</button>
                     </div>
                 </header>
                 <div class="filter-bar">
-                    <input type="text" id="search-input" class="filter-input" placeholder="🔎 Buscar por descrição..."><select id="type-filter" class="filter-select"><option value="all">Todos os Tipos</option><option value="income">Receita</option><option value="expense">Despesa</option></select><select id="month-filter" class="filter-select"></select>
+                    <input type="text" id="search-input" class="filter-input" placeholder="🔎 Buscar por descrição..."><select id="type-filter" class="filter-select"><option value="all">Todos os Tipos</option><option value="income">Receita</option><option value="expense">Despesa</option></select><select id="category-filter" class="filter-select"><option value="all">Todas as Categorias</option><option value="Alimentação">Alimentação</option><option value="Moradia">Moradia</option><option value="Transporte">Transporte</option><option value="Saúde">Saúde</option><option value="Educação">Educação</option><option value="Lazer">Lazer</option><option value="Vestuário">Vestuário</option><option value="Assinaturas">Assinaturas</option><option value="Cartão de Crédito">Cartão de Crédito</option><option value="Salário">Salário</option><option value="Freelance">Freelance</option><option value="Investimentos">Investimentos</option><option value="Outros">Outros</option></select><select id="month-filter" class="filter-select"></select>
                 </div>
                 <div class="full-transactions-list">
                      <h3>Todas as Transações</h3>
@@ -116,7 +128,7 @@
                 <div class="settings-card">
                     <h3>Definir Limites por Categoria</h3>
                     <form id="budget-form">
-                        <div class="form-group"><label for="budget-category">Categoria</label><input type="text" id="budget-category" placeholder="Ex: Alimentação" required></div>
+                        <div class="form-group"><label for="budget-category">Categoria</label><select id="budget-category" required><option value="">Selecione...</option><option value="Alimentação">Alimentação</option><option value="Moradia">Moradia</option><option value="Transporte">Transporte</option><option value="Saúde">Saúde</option><option value="Educação">Educação</option><option value="Lazer">Lazer</option><option value="Vestuário">Vestuário</option><option value="Assinaturas">Assinaturas</option><option value="Cartão de Crédito">Cartão de Crédito</option><option value="Outros">Outros</option></select></div>
                         <div class="form-group"><label for="budget-amount">Valor da Meta (R$)</label><input type="number" id="budget-amount" placeholder="Ex: 500" required step="0.01" min="0"></div>
                         <button type="submit" class="btn-primary">Salvar Meta</button>
                     </form>
@@ -133,7 +145,7 @@
                         <div class="form-group"><label for="recurring-description">Descrição</label><input type="text" id="recurring-description" placeholder="Ex: Salário, Aluguel" required></div>
                         <div class="form-group"><label for="recurring-amount">Valor (R$)</label><input type="number" id="recurring-amount" placeholder="Ex: 1200" required step="0.01" min="0"></div>
                         <div class="form-group"><label for="recurring-day">Dia do Mês para Lançamento</label><input type="number" id="recurring-day" placeholder="Ex: 5" required min="1" max="31"></div>
-                        <div class="form-group"><label for="recurring-category">Categoria</label><input type="text" id="recurring-category" placeholder="Ex: Salário, Moradia" required></div>
+                        <div class="form-group"><label for="recurring-category">Categoria</label><select id="recurring-category" required><option value="">Selecione...</option><optgroup label="Despesas"><option value="Alimentação">Alimentação</option><option value="Moradia">Moradia</option><option value="Transporte">Transporte</option><option value="Saúde">Saúde</option><option value="Educação">Educação</option><option value="Lazer">Lazer</option><option value="Vestuário">Vestuário</option><option value="Assinaturas">Assinaturas</option><option value="Cartão de Crédito">Cartão de Crédito</option><option value="Outros">Outros</option></optgroup><optgroup label="Receitas"><option value="Salário">Salário</option><option value="Freelance">Freelance</option><option value="Investimentos">Investimentos</option><option value="Presente">Presente</option><option value="Outras Receitas">Outras Receitas</option></optgroup></select></div>
                         <div class="form-group"><label for="recurring-type">Tipo</label><select id="recurring-type" required><option value="income">Receita</option><option value="expense">Despesa</option></select></div>
                         <button type="submit" class="btn-primary">Salvar Transação Recorrente</button>
                     </form>
@@ -159,7 +171,7 @@
         </main>
     </div>
 
-    <div id="transaction-modal" class="modal-overlay page-hidden"><div class="modal-content"><form id="transaction-form"><h3 id="modal-title">Nova Transação</h3><input type="hidden" id="transaction-id"><div class="form-group"><label for="description">Descrição</label><input type="text" id="description" required></div><div class="form-group"><label for="amount">Valor</label><input type="number" id="amount" step="0.01" placeholder="Ex: 15.50 (sempre positivo)" required min="0"></div><div class="form-group"><label for="date">Data</label><input type="date" id="date" required></div><div class="form-group"><label for="category">Categoria</label><input type="text" id="category" required></div><div class="form-group"><label for="type">Tipo</label><select id="type" required><option value="expense">Despesa</option><option value="income">Receita</option></select></div><div class="form-group" id="payment-method-group"><label for="payment-method">Método de Pagamento</label><select id="payment-method"><option value="Pix">Pix</option><option value="Cartão de Crédito">Cartão de Crédito</option><option value="Cartão de Débito">Cartão de Débito</option><option value="Dinheiro">Dinheiro</option><option value="Boleto">Boleto</option><option value="Transferência">Transferência</option></select></div><div class="form-actions"><button type="button" id="cancel-btn" class="btn-secondary">Cancelar</button><button type="submit" class="btn-primary">Salvar</button></div></form></div></div>
+    <div id="transaction-modal" class="modal-overlay page-hidden"><div class="modal-content"><form id="transaction-form"><h3 id="modal-title">Nova Transação</h3><input type="hidden" id="transaction-id"><div class="form-group"><label for="description">Descrição</label><input type="text" id="description" required></div><div class="form-group"><label for="amount">Valor</label><input type="number" id="amount" step="0.01" placeholder="Ex: 15.50 (sempre positivo)" required min="0"></div><div class="form-group"><label for="date">Data</label><input type="date" id="date" required></div><div class="form-group"><label for="category">Categoria</label><select id="category" required><option value="">Selecione...</option><optgroup label="Despesas"><option value="Alimentação">Alimentação</option><option value="Moradia">Moradia</option><option value="Transporte">Transporte</option><option value="Saúde">Saúde</option><option value="Educação">Educação</option><option value="Lazer">Lazer</option><option value="Vestuário">Vestuário</option><option value="Assinaturas">Assinaturas</option><option value="Cartão de Crédito">Cartão de Crédito</option><option value="Outros">Outros</option></optgroup><optgroup label="Receitas"><option value="Salário">Salário</option><option value="Freelance">Freelance</option><option value="Investimentos">Investimentos</option><option value="Presente">Presente</option><option value="Outras Receitas">Outras Receitas</option></optgroup></select></div><div class="form-group"><label for="type">Tipo</label><select id="type" required><option value="expense">Despesa</option><option value="income">Receita</option></select></div><div class="form-group" id="payment-method-group"><label for="payment-method">Método de Pagamento</label><select id="payment-method"><option value="Pix">Pix</option><option value="Cartão de Crédito">Cartão de Crédito</option><option value="Cartão de Débito">Cartão de Débito</option><option value="Dinheiro">Dinheiro</option><option value="Boleto">Boleto</option><option value="Transferência">Transferência</option></select></div><div class="form-actions"><button type="button" id="cancel-btn" class="btn-secondary">Cancelar</button><button type="submit" class="btn-primary">Salvar</button></div></form></div></div>
     <div id="confirmation-modal" class="modal-overlay page-hidden"><div class="modal-content"><h3 id="confirmation-title">Confirmar Ação</h3><p id="confirmation-message">Você tem certeza?</p><div class="form-actions"><button id="cancel-confirmation-btn" class="btn-secondary">Cancelar</button><button id="confirm-action-btn" class="btn-danger">Sim, Excluir</button></div></div></div>
     <div id="loading-overlay">
         <div class="loading-spinner"></div>

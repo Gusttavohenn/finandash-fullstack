@@ -22,7 +22,7 @@ const authLimiter = rateLimit({
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors({ origin: "https://nexo-financeiro.vercel.app" }));
+app.use(cors({ origin: process.env.CORS_ORIGIN || "https://nexo-financeiro.vercel.app" }));
 app.use(express.json());
 
 const createTables = async () => {

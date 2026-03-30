@@ -8,6 +8,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginError = document.getElementById('login-error');
     const signupError = document.getElementById('signup-error');
 
+    document.querySelectorAll('.toggle-password').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const input = btn.previousElementSibling;
+            const isHidden = input.type === 'password';
+            input.type = isHidden ? 'text' : 'password';
+            btn.querySelector('i').className = isHidden ? 'fas fa-eye-slash' : 'fas fa-eye';
+        });
+    });
+
     // API_URL definido em config.js
 
     /**

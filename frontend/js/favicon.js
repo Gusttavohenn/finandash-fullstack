@@ -7,3 +7,7 @@ function setFavicon() {
     document.head.appendChild(link);
 }
 setFavicon();
+
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
