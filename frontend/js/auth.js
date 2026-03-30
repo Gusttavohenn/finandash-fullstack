@@ -42,6 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (demoBtn) {
         demoBtn.addEventListener('click', () => {
             localStorage.setItem('demoMode', 'true');
+            localStorage.setItem('loggedInUser', JSON.stringify({ id: 0, name: 'Usuário Demo', email: 'demo@nexo.app' }));
+            localStorage.setItem('authToken', 'demo');
             window.location.href = '/index.html';
         });
     }
