@@ -149,7 +149,7 @@ class View {
             this.balanceEvolutionChart.data.datasets[0].borderColor = borderColor;
             this.balanceEvolutionChart.update();
         } else {
-            this.balanceEvolutionChart = new Chart(this.balanceEvolutionChartContext, { type: 'bar', data: { labels: data.labels, datasets: [{ label: 'Saldo do Mês', data: data.balanceData, backgroundColor: color, borderColor: borderColor, borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } } });
+            this.balanceEvolutionChart = new Chart(this.balanceEvolutionChartContext, { type: 'bar', data: { labels: data.labels, datasets: [{ label: 'Saldo do Mês', data: data.balanceData, backgroundColor: color, borderColor: borderColor, borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: true, aspectRatio: 2.5, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } } });
         }
     }
     populateMonthFilter(transactions) {
