@@ -76,6 +76,7 @@ body {
 .card-icon.income { background-color: var(--income-color); }
 .card-icon.expense { background-color: var(--expense-color); }
 .card-icon.balance { background-color: var(--balance-color); }
+.card-icon.forecast { background-color: #6f42c1; }
 .card-info h4 { color: var(--text-muted); font-size: 0.9rem; font-weight: 500; }
 .card-info p { font-size: 1.5rem; font-weight: 700; }
 .data-section { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
@@ -191,28 +192,26 @@ body {
     .settings-card { padding: 16px; }
     .danger-zone { margin-top: 12px; }
 }
-/* --- LOADING OVERLAY --- */
-#loading-overlay {
-    position: fixed;
-    inset: 0;
-    background-color: var(--bg-color);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    z-index: 9999;
-    transition: opacity 0.3s;
-}
-#loading-overlay.hidden { display: none; }
-#loading-overlay p { color: var(--text-muted); font-size: 0.95rem; }
-#loading-overlay .loading-hint { font-size: 0.78rem; }
-.loading-spinner {
-    width: 48px;
-    height: 48px;
-    border: 5px solid var(--border-color);
-    border-top-color: var(--primary-color);
-    border-radius: 50%;
-    animation: spin 0.9s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
+/* --- SKELETON LOADING --- */
+.skeleton-overlay { position: absolute; inset: 0; background: var(--bg-color); z-index: 100; padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+.skeleton-overlay.hidden { display: none; }
+.skeleton { background: linear-gradient(90deg, var(--border-color) 25%, var(--card-bg) 50%, var(--border-color) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.skeleton-header { display: flex; justify-content: space-between; align-items: center; }
+.sk-title { height: 28px; width: 160px; }
+.sk-btn { height: 36px; width: 100px; }
+.skeleton-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+.skeleton-card-item { background: var(--card-bg); border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow); }
+.sk-icon { width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0; }
+.sk-label { height: 14px; width: 90px; margin-bottom: 10px; }
+.sk-amount { height: 28px; width: 120px; }
+.sk-chart { height: 240px; }
+.sk-table { height: 180px; }
+.main-content { position: relative; }
+
+/* --- LOADING OVERLAY (fallback) --- */
+#loading-overlay { display: none; }
+
+/* --- DEMO BANNER --- */
+.demo-banner { background: #6f42c1; color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+.demo-banner.hidden { display: none; }

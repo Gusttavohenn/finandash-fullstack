@@ -32,6 +32,16 @@
         </nav>
 
         <main class="main-content">
+            <div id="skeleton-overlay" class="skeleton-overlay">
+                <div class="skeleton-header"><div class="skeleton sk-title"></div><div class="skeleton sk-btn"></div></div>
+                <div class="skeleton-cards">
+                    <div class="skeleton-card-item"><div class="skeleton sk-icon"></div><div><div class="skeleton sk-label"></div><div class="skeleton sk-amount"></div></div></div>
+                    <div class="skeleton-card-item"><div class="skeleton sk-icon"></div><div><div class="skeleton sk-label"></div><div class="skeleton sk-amount"></div></div></div>
+                    <div class="skeleton-card-item"><div class="skeleton sk-icon"></div><div><div class="skeleton sk-label"></div><div class="skeleton sk-amount"></div></div></div>
+                </div>
+                <div class="skeleton sk-chart"></div>
+                <div class="skeleton sk-table"></div>
+            </div>
             <section id="dashboard-page" class="page-content">
                 <header class="main-header">
                     <div class="header-title">
@@ -46,6 +56,8 @@
                         </div>
                     </div>
                     <div class="header-actions">
+                        <div id="demo-banner" class="demo-banner hidden"><i class="fas fa-flask"></i> Modo Demo</div>
+                        <button id="pdf-btn" class="btn-secondary"><i class="fas fa-file-pdf"></i> PDF</button>
                         <button class="theme-toggle" id="theme-toggle"><i class="fas fa-moon"></i></button>
                         <div class="user-profile"><span>Olá, Usuário</span></div>
                     </div>
@@ -54,6 +66,7 @@
                     <div class="card"><i class="fa-solid fa-arrow-trend-up card-icon income"></i><div class="card-info"><h4>Entrada Total</h4><p id="total-revenue">R$ 0,00</p></div></div>
                     <div class="card"><i class="fa-solid fa-arrow-trend-down card-icon expense"></i><div class="card-info"><h4>Saída Total</h4><p id="total-expenses">R$ 0,00</p></div></div>
                     <div class="card"><i class="fa-solid fa-scale-balanced card-icon balance"></i><div class="card-info"><h4>Balanço</h4><p id="balance">R$ 0,00</p></div></div>
+                    <div class="card"><i class="fa-solid fa-calendar-check card-icon forecast"></i><div class="card-info"><h4>Previsão Próximo Mês</h4><p id="forecast-balance">R$ 0,00</p></div></div>
                 </section>
                 <section id="reminders-overview" class="data-section-single-col">
                     <h3>Lembretes Próximos</h3>
@@ -173,7 +186,7 @@
         </main>
     </div>
 
-    <div id="transaction-modal" class="modal-overlay page-hidden"><div class="modal-content"><form id="transaction-form"><h3 id="modal-title">Nova Transação</h3><input type="hidden" id="transaction-id"><div class="form-group"><label for="description">Descrição</label><input type="text" id="description" required></div><div class="form-group"><label for="amount">Valor</label><input type="number" id="amount" step="0.01" placeholder="Ex: 15.50 (sempre positivo)" required min="0"></div><div class="form-group"><label for="date">Data</label><input type="date" id="date" required></div><div class="form-group"><label for="category">Categoria</label><select id="category" required><option value="">Selecione...</option><optgroup label="Despesas"><option value="Alimentação">Alimentação</option><option value="Moradia">Moradia</option><option value="Transporte">Transporte</option><option value="Saúde">Saúde</option><option value="Educação">Educação</option><option value="Lazer">Lazer</option><option value="Vestuário">Vestuário</option><option value="Assinaturas">Assinaturas</option><option value="Cartão de Crédito">Cartão de Crédito</option><option value="Outros">Outros</option></optgroup><optgroup label="Receitas"><option value="Salário">Salário</option><option value="Freelance">Freelance</option><option value="Investimentos">Investimentos</option><option value="Presente">Presente</option><option value="Outras Receitas">Outras Receitas</option></optgroup></select></div><div class="form-group"><label for="type">Tipo</label><select id="type" required><option value="expense">Despesa</option><option value="income">Receita</option></select></div><div class="form-group" id="payment-method-group"><label for="payment-method">Método de Pagamento</label><select id="payment-method"><option value="Pix">Pix</option><option value="Cartão de Crédito">Cartão de Crédito</option><option value="Cartão de Débito">Cartão de Débito</option><option value="Dinheiro">Dinheiro</option><option value="Boleto">Boleto</option><option value="Transferência">Transferência</option></select></div><div class="form-actions"><button type="button" id="cancel-btn" class="btn-secondary">Cancelar</button><button type="submit" class="btn-primary">Salvar</button></div></form></div></div>
+    <div id="transaction-modal" class="modal-overlay page-hidden"><div class="modal-content"><form id="transaction-form"><h3 id="modal-title">Nova Transação</h3><input type="hidden" id="transaction-id"><div class="form-group"><label for="description">Descrição</label><input type="text" id="description" required maxlength="255"></div><div class="form-group"><label for="amount">Valor</label><input type="number" id="amount" step="0.01" placeholder="Ex: 15.50 (sempre positivo)" required min="0"></div><div class="form-group"><label for="date">Data</label><input type="date" id="date" required></div><div class="form-group"><label for="category">Categoria</label><select id="category" required><option value="">Selecione...</option><optgroup label="Despesas"><option value="Alimentação">Alimentação</option><option value="Moradia">Moradia</option><option value="Transporte">Transporte</option><option value="Saúde">Saúde</option><option value="Educação">Educação</option><option value="Lazer">Lazer</option><option value="Vestuário">Vestuário</option><option value="Assinaturas">Assinaturas</option><option value="Cartão de Crédito">Cartão de Crédito</option><option value="Outros">Outros</option></optgroup><optgroup label="Receitas"><option value="Salário">Salário</option><option value="Freelance">Freelance</option><option value="Investimentos">Investimentos</option><option value="Presente">Presente</option><option value="Outras Receitas">Outras Receitas</option></optgroup></select></div><div class="form-group"><label for="type">Tipo</label><select id="type" required><option value="expense">Despesa</option><option value="income">Receita</option></select></div><div class="form-group" id="payment-method-group"><label for="payment-method">Método de Pagamento</label><select id="payment-method"><option value="Pix">Pix</option><option value="Cartão de Crédito">Cartão de Crédito</option><option value="Cartão de Débito">Cartão de Débito</option><option value="Dinheiro">Dinheiro</option><option value="Boleto">Boleto</option><option value="Transferência">Transferência</option></select></div><div class="form-actions"><button type="button" id="cancel-btn" class="btn-secondary">Cancelar</button><button type="submit" class="btn-primary">Salvar</button></div></form></div></div>
     <div id="confirmation-modal" class="modal-overlay page-hidden"><div class="modal-content"><h3 id="confirmation-title">Confirmar Ação</h3><p id="confirmation-message">Você tem certeza?</p><div class="form-actions"><button id="cancel-confirmation-btn" class="btn-secondary">Cancelar</button><button id="confirm-action-btn" class="btn-danger">Sim, Excluir</button></div></div></div>
     <div id="loading-overlay">
         <div class="loading-spinner"></div>
@@ -183,6 +196,7 @@
     <div id="toast-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="js/config.js"></script>
     <script src="js/model.js"></script>
     <script src="js/view.js"></script>

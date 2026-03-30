@@ -38,6 +38,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 4000);
     }
 
+    const demoBtn = document.getElementById('demo-btn');
+    if (demoBtn) {
+        demoBtn.addEventListener('click', () => {
+            localStorage.setItem('demoMode', 'true');
+            window.location.href = '/index.html';
+        });
+    }
+
     showSignup.addEventListener('click', (e) => {
         e.preventDefault();
         loginFormContainer.classList.add('hidden');

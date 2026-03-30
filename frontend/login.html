@@ -36,6 +36,8 @@
                 <p id="login-error" class="error-message"></p>
                 <button type="submit" class="btn-auth">Entrar</button>
                 <p class="toggle-text">Não tem uma conta? <a href="#" id="show-signup">Cadastre-se</a></p>
+                <div class="demo-divider"><span>ou</span></div>
+                <button type="button" id="demo-btn" class="btn-demo"><i class="fas fa-flask"></i> Experimentar sem cadastro</button>
             </form>
         </div>
 
@@ -48,11 +50,11 @@
                 <p class="form-subtitle">Crie sua conta gratuita</p>
                  <div class="form-group">
                     <label for="signup-name">Nome</label>
-                    <input type="text" id="signup-name" required>
+                    <input type="text" id="signup-name" required maxlength="100">
                 </div>
                 <div class="form-group">
                     <label for="signup-email">Email</label>
-                    <input type="email" id="signup-email" required>
+                    <input type="email" id="signup-email" required maxlength="100">
                 </div>
                 <div class="form-group">
                     <label for="signup-password">Senha</label>

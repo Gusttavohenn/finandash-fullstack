@@ -29,6 +29,38 @@ class Model {
         return res;
     }
 
+    loadDemoData() {
+        const today = new Date();
+        const m = (n) => `${today.getFullYear()}-${String(today.getMonth() + 1 - n).padStart(2,'0')}`;
+        this.userSettings.name = 'Usuário Demo';
+        this.transactions = [
+            { id:1, description:'Salário', amount:5000, date:`${m(0)}-05`, type:'income', category:'Salário', paymentmethod:null },
+            { id:2, description:'Aluguel', amount:-1500, date:`${m(0)}-10`, type:'expense', category:'Moradia', paymentmethod:'Transferência' },
+            { id:3, description:'Supermercado', amount:-450, date:`${m(0)}-12`, type:'expense', category:'Alimentação', paymentmethod:'Cartão de Débito' },
+            { id:4, description:'Netflix', amount:-45, date:`${m(0)}-15`, type:'expense', category:'Assinaturas', paymentmethod:'Cartão de Crédito' },
+            { id:5, description:'Freelance', amount:1200, date:`${m(0)}-18`, type:'income', category:'Freelance', paymentmethod:null },
+            { id:6, description:'Farmácia', amount:-120, date:`${m(0)}-20`, type:'expense', category:'Saúde', paymentmethod:'Pix' },
+            { id:7, description:'Salário', amount:5000, date:`${m(1)}-05`, type:'income', category:'Salário', paymentmethod:null },
+            { id:8, description:'Aluguel', amount:-1500, date:`${m(1)}-10`, type:'expense', category:'Moradia', paymentmethod:'Transferência' },
+            { id:9, description:'Restaurante', amount:-180, date:`${m(1)}-14`, type:'expense', category:'Alimentação', paymentmethod:'Cartão de Crédito' },
+            { id:10, description:'Uber', amount:-80, date:`${m(1)}-16`, type:'expense', category:'Transporte', paymentmethod:'Pix' },
+        ];
+        this.budgets = { 'Alimentação': 600, 'Moradia': 1800, 'Transporte': 200, 'Saúde': 300, 'Assinaturas': 100 };
+        this.recurringTransactions = [
+            { id:1, description:'Salário', amount:5000, dayofmonth:5, category:'Salário', type:'income', lastgenerated:null },
+            { id:2, description:'Aluguel', amount:-1500, dayofmonth:10, category:'Moradia', type:'expense', lastgenerated:null },
+            { id:3, description:'Netflix', amount:-45, dayofmonth:15, category:'Assinaturas', type:'expense', lastgenerated:null },
+        ];
+        this.reminders = [
+            { id:1, description:'Fatura Cartão', amount:850, duedate:new Date(today.getFullYear(), today.getMonth(), today.getDate()+3).toISOString().slice(0,10), ispaid:false },
+            { id:2, description:'Conta de Luz', amount:180, duedate:new Date(today.getFullYear(), today.getMonth(), today.getDate()+7).toISOString().slice(0,10), ispaid:false },
+        ];
+        const user = { id:0, name:'Usuário Demo', email:'demo@nexo.app' };
+        localStorage.setItem('loggedInUser', JSON.stringify(user));
+        localStorage.setItem('authToken', 'demo');
+        localStorage.setItem('demoMode', 'true');
+    }
+    get isDemo() { return localStorage.getItem('demoMode') === 'true'; }
     async loadInitialData() {
         try {
             await this._fetch(`${this.API_URL}/recurring/generate`, { method: 'POST', headers: this._getAuthHeaders() });
@@ -88,6 +120,17 @@ class Model {
     calculateTotals(transactions) { const t = transactions.reduce((a, t) => { if (t.type === 'income') a.revenue += parseFloat(t.amount); else if (t.type === 'expense') a.expenses += parseFloat(t.amount); return a; }, { revenue: 0, expenses: 0 }); t.balance = t.revenue + t.expenses; return t; }
     getExpensesByCategory(transactions) { return transactions.filter(t => t.type === 'expense').reduce((a, t) => { const { category: c, amount: m } = t; if (!a[c]) a[c] = 0; a[c] += Math.abs(parseFloat(m)); return a; }, {}); }
     getMonthlySummary(numMonths) { const s = { labels: [], incomeData: [], expenseData: [] }; const n = new Date(); n.setDate(15); for (let i = 0; i < numMonths; i++) { const d = new Date(n.getFullYear(), n.getMonth() - i, 15); const l = `${d.toLocaleString('pt-BR', { month: 'short' }).replace('.', '')}/${d.getFullYear()}`; s.labels.push(l.charAt(0).toUpperCase() + l.slice(1)); const m = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; const mT = this.transactions.filter(t => t.date.startsWith(m)); let tI = 0; let tE = 0; mT.forEach(t => { if (t.type === 'income') tI += parseFloat(t.amount); else tE += Math.abs(parseFloat(t.amount)); }); s.incomeData.push(tI); s.expenseData.push(tE); } s.labels.reverse(); s.incomeData.reverse(); s.expenseData.reverse(); return s; }
+    getNextMonthForecast() {
+        const now = new Date();
+        const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        const daysInNextMonth = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 0).getDate();
+        let forecast = 0;
+        this.recurringTransactions.forEach(rt => {
+            const day = Math.min(rt.dayofmonth, daysInNextMonth);
+            if (day) forecast += parseFloat(rt.amount);
+        });
+        return forecast;
+    }
     getBalanceEvolution(numMonths) {
         const labels = [], balanceData = [];
         const now = new Date();

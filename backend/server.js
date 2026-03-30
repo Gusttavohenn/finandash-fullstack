@@ -4,6 +4,7 @@ const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 const db = require('./db.js');
 
 if (!process.env.JWT_SECRET) {
@@ -22,6 +23,7 @@ const authLimiter = rateLimit({
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors({ origin: process.env.CORS_ORIGIN || "https://nexo-financeiro.vercel.app" }));
 app.use(express.json());
 
@@ -48,7 +50,10 @@ app.post('/api/register', authLimiter, async (req, res) => {
     try {
         const { name, email, password } = req.body;
         if (!name || !email || !password) return res.status(400).json({ message: 'Todos os campos são obrigatórios.' });
+        if (name.length > 100) return res.status(400).json({ message: 'Nome deve ter no máximo 100 caracteres.' });
+        if (email.length > 100) return res.status(400).json({ message: 'Email deve ter no máximo 100 caracteres.' });
         if (password.length < 6) return res.status(400).json({ message: 'A senha deve ter no mínimo 6 caracteres.' });
+        if (password.length > 100) return res.status(400).json({ message: 'Senha deve ter no máximo 100 caracteres.' });
         const existingUser = await db.query("SELECT * FROM users WHERE email = $1", [email]);
         if (existingUser.rows.length > 0) return res.status(400).json({ message: 'Este email já está em uso.' });
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -82,7 +87,7 @@ app.put('/api/profile', authenticateToken, async (req, res) => {
 
 // --- ROTAS DE TRANSAÇÕES ---
 app.get('/api/transactions', authenticateToken, async (req, res) => { try { const r = await db.query("SELECT * FROM transactions WHERE userId = $1 ORDER BY date DESC, id DESC", [req.user.id]); res.json(r.rows); } catch (e) { console.error(e); res.status(500).json({message: 'Erro ao buscar transações.'}); } });
-app.post('/api/transactions', authenticateToken, async (req, res) => { try { const { description, amount, date, type, category, paymentMethod } = req.body; const finalAmount = type === 'expense' ? -Math.abs(amount) : Math.abs(amount); const r = await db.query(`INSERT INTO transactions (description, amount, date, type, category, paymentMethod, userId) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`, [description, finalAmount, date, type, category, paymentMethod, req.user.id]); res.status(201).json(r.rows[0]); } catch (e) { console.error(e); res.status(500).json({message: 'Erro ao adicionar transação.'}); } });
+app.post('/api/transactions', authenticateToken, async (req, res) => { try { const { description, amount, date, type, category, paymentMethod } = req.body; if (description?.length > 255) return res.status(400).json({ message: 'Descrição deve ter no máximo 255 caracteres.' }); if (category?.length > 100) return res.status(400).json({ message: 'Categoria deve ter no máximo 100 caracteres.' }); const finalAmount = type === 'expense' ? -Math.abs(amount) : Math.abs(amount); const r = await db.query(`INSERT INTO transactions (description, amount, date, type, category, paymentMethod, userId) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`, [description, finalAmount, date, type, category, paymentMethod, req.user.id]); res.status(201).json(r.rows[0]); } catch (e) { console.error(e); res.status(500).json({message: 'Erro ao adicionar transação.'}); } });
 app.put('/api/transactions/:id', authenticateToken, async (req, res) => { try { const { description, amount, date, type, category, paymentMethod } = req.body; const finalAmount = type === 'expense' ? -Math.abs(amount) : Math.abs(amount); const r = await db.query(`UPDATE transactions SET description = $1, amount = $2, date = $3, type = $4, category = $5, paymentMethod = $6 WHERE id = $7 AND userId = $8 RETURNING *`, [description, finalAmount, date, type, category, paymentMethod, req.params.id, req.user.id]); if (r.rows.length === 0) return res.status(404).json({ message: "Transação não encontrada." }); res.json(r.rows[0]); } catch (e) { console.error(e); res.status(500).json({message: 'Erro ao atualizar transação.'}); } });
 app.delete('/api/transactions/:id', authenticateToken, async (req, res) => { try { const r = await db.query("DELETE FROM transactions WHERE id = $1 AND userId = $2", [req.params.id, req.user.id]); if (r.rowCount === 0) return res.status(404).json({ message: "Transação não encontrada." }); res.sendStatus(204); } catch (e) { console.error(e); res.status(500).json({message: 'Erro ao excluir transação.'}); } });
 app.delete('/api/transactions', authenticateToken, async (req, res) => { try { await db.query("DELETE FROM transactions WHERE userId = $1", [req.user.id]); res.sendStatus(204); } catch (e) { console.error(e); res.status(500).json({message: 'Erro ao limpar transações.'}); } });

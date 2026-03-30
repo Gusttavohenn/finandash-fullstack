@@ -206,3 +206,9 @@ footer {
 .input-password-wrapper input { width: 100%; padding-right: 40px; }
 .toggle-password { position: absolute; right: 10px; background: none; border: none; cursor: pointer; color: #888; padding: 0; font-size: 0.9rem; }
 .toggle-password:hover { color: var(--primary-color, #4A69BD); }
+
+/* --- MODO DEMO --- */
+.demo-divider { display: flex; align-items: center; gap: 10px; margin: 16px 0 12px; color: #aaa; font-size: 0.85rem; }
+.demo-divider::before, .demo-divider::after { content: ''; flex: 1; height: 1px; background: #ddd; }
+.btn-demo { width: 100%; padding: 10px; border: 2px dashed #6f42c1; background: transparent; color: #6f42c1; border-radius: 8px; font-size: 0.9rem; cursor: pointer; transition: background 0.2s, color 0.2s; font-family: inherit; }
+.btn-demo:hover { background: #6f42c1; color: #fff; }

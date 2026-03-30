@@ -5,6 +5,7 @@ class View {
         this.totalRevenueEl = document.getElementById('total-revenue');
         this.totalExpensesEl = document.getElementById('total-expenses');
         this.balanceEl = document.getElementById('balance');
+        this.forecastEl = document.getElementById('forecast-balance');
         this.transactionsTableBody = document.querySelector('#transactions-table tbody');
         this.chartContext = document.getElementById('expensesChart').getContext('2d');
         this.expensesChart = null;
@@ -54,15 +55,20 @@ class View {
         this.dashboardRemindersContainer = document.getElementById('dashboard-reminders-container');
         this.exportCsvBtn = document.getElementById('export-csv-btn');
         this.importCsvInput = document.getElementById('import-csv-input');
+        this.pdfBtn = document.getElementById('pdf-btn');
     }
 
     _formatCurrency(value) { return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
     _safe(str) { const d = document.createElement('div'); d.textContent = str ?? ''; return d.innerHTML; }
 
-    renderCards(totals) {
+    renderCards(totals, forecast) {
         this.totalRevenueEl.textContent = this._formatCurrency(totals.revenue);
         this.totalExpensesEl.textContent = this._formatCurrency(Math.abs(totals.expenses));
         this.balanceEl.textContent = this._formatCurrency(totals.balance);
+        if (this.forecastEl) {
+            this.forecastEl.textContent = this._formatCurrency(forecast);
+            this.forecastEl.style.color = forecast >= 0 ? 'var(--income-color)' : 'var(--expense-color)';
+        }
     }
 
     renderTransactionsTable(transactions) {
@@ -225,9 +231,43 @@ class View {
     hideConfirmationModal() { this.confirmationModal.classList.add('page-hidden'); }
     showConfirmationModal(message, onConfirm) { this.confirmationMessage.textContent = message; this.confirmationModal.classList.remove('page-hidden'); this.confirmActionBtn.onclick = () => { onConfirm(); this.hideConfirmationModal(); }; }
     showToast(message, type = 'success') { const t = document.createElement('div'); t.className = `toast ${type}`; t.textContent = message; this.toastContainer.appendChild(t); setTimeout(() => { t.remove(); }, 4000); }
-    showLoading() { const o = document.getElementById('loading-overlay'); if (o) o.classList.remove('hidden'); }
-    hideLoading() { const o = document.getElementById('loading-overlay'); if (o) o.classList.add('hidden'); }
+    showLoading() { const o = document.getElementById('skeleton-overlay'); if (o) o.classList.remove('hidden'); }
+    hideLoading() { const o = document.getElementById('skeleton-overlay'); if (o) o.classList.add('hidden'); }
     bindExportCSV(h) { if (this.exportCsvBtn) this.exportCsvBtn.addEventListener('click', h); }
+    bindPDF(h) { if (this.pdfBtn) this.pdfBtn.addEventListener('click', h); }
+    generatePDF(transactions, totals, expensesByCategory, userName) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const now = new Date();
+        const monthName = now.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
+        let y = 20;
+        doc.setFontSize(20); doc.setTextColor(74, 105, 189); doc.text('NEXO - Relatório Financeiro', 105, y, { align: 'center' }); y += 8;
+        doc.setFontSize(11); doc.setTextColor(100); doc.text(`${monthName.charAt(0).toUpperCase() + monthName.slice(1)} • Gerado em ${now.toLocaleDateString('pt-BR')}`, 105, y, { align: 'center' }); y += 6;
+        doc.text(`Usuário: ${userName}`, 105, y, { align: 'center' }); y += 10;
+        doc.setDrawColor(74, 105, 189); doc.line(14, y, 196, y); y += 8;
+        doc.setFontSize(13); doc.setTextColor(40); doc.text('Resumo do Período', 14, y); y += 8;
+        const cards = [['Receitas', totals.revenue, [40,167,69]], ['Despesas', Math.abs(totals.expenses), [220,53,69]], ['Balanço', totals.balance, totals.balance >= 0 ? [40,167,69] : [220,53,69]]];
+        cards.forEach(([label, value, color]) => { doc.setFontSize(10); doc.setTextColor(...color); doc.text(`${label}: ${value.toLocaleString('pt-BR', { style:'currency', currency:'BRL' })}`, 14, y); y += 7; });
+        y += 3; doc.line(14, y, 196, y); y += 8;
+        if (Object.keys(expensesByCategory).length > 0) {
+            doc.setFontSize(13); doc.setTextColor(40); doc.text('Despesas por Categoria', 14, y); y += 8;
+            Object.entries(expensesByCategory).sort((a,b) => b[1]-a[1]).forEach(([cat, val]) => { doc.setFontSize(10); doc.setTextColor(60); doc.text(`• ${cat}: ${val.toLocaleString('pt-BR', { style:'currency', currency:'BRL' })}`, 18, y); y += 6; if (y > 270) { doc.addPage(); y = 20; } });
+            y += 3; doc.line(14, y, 196, y); y += 8;
+        }
+        doc.setFontSize(13); doc.setTextColor(40); doc.text('Transações', 14, y); y += 8;
+        doc.setFontSize(9); doc.setTextColor(100);
+        doc.text('Descrição', 14, y); doc.text('Data', 100, y); doc.text('Valor', 145, y); doc.text('Categoria', 170, y); y += 5;
+        doc.line(14, y, 196, y); y += 4;
+        transactions.slice(0, 40).forEach(t => {
+            if (y > 275) { doc.addPage(); y = 20; }
+            const color = t.type === 'income' ? [40,167,69] : [220,53,69];
+            doc.setTextColor(50); doc.text(String(t.description).substring(0,30), 14, y);
+            doc.text(new Date(t.date).toLocaleDateString('pt-BR', {timeZone:'UTC'}), 100, y);
+            doc.setTextColor(...color); doc.text(parseFloat(t.amount).toLocaleString('pt-BR', {style:'currency',currency:'BRL'}), 145, y);
+            doc.setTextColor(50); doc.text(String(t.category).substring(0,18), 170, y); y += 6;
+        });
+        doc.save(`nexo-relatorio-${now.toISOString().slice(0,7)}.pdf`);
+    }
     bindImportCSV(h) { if (this.importCsvInput) this.importCsvInput.addEventListener('change', e => { const file = e.target.files[0]; if (file) { h(file); e.target.value = ''; } }); }
     parseCSV(text) {
         const lines = text.trim().split('\n').filter(l => l.trim());

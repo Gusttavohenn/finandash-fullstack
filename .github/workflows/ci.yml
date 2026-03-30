@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    name: Backend - verificar dependências
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+      - name: Instalar dependências
+        run: npm ci
+      - name: Verificar variáveis de ambiente obrigatórias
+        run: |
+          echo "Verificando .env.example..."
+          test -f .env.example && echo ".env.example existe ✓" || exit 1
